@@ -1,7 +1,7 @@
 {
   "name": "svnc",
   "version": "0.1.0-dev",
-  "description": "Simple VNC \u2014 browser VNC client with Agent-friendly screenshot and input APIs",
+  "description": "Simple VNC — browser VNC client with Agent-friendly screenshot and input APIs",
   "type": "module",
   "license": "MIT",
   "private": true,
@@ -51,9 +51,6 @@
     "typescript": "^5.7.2",
     "vitest": "^2.1.8",
     "ws": "^8.22.0"
-  },
-  "optionalDependencies": {
-    "@novnc/novnc": "^1.5.0"
   },
   "engines": {
     "node": ">=18"

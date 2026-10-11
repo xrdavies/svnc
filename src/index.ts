@@ -1,7 +1,7 @@
 /**
  * SVNC — Simple VNC client with Agent-friendly screenshot + input APIs.
- * Default implementation: lean RFB over WebSocket (Phase 2+).
- * Wrap Spike (@novnc/novnc) lives in adapters/novnc-legacy (deprecated).
+ * Default (only) runtime path: lean RFB over WebSocket.
+ * Historical Wrap Spike lives under examples/archive/novnc-legacy.ts (not shipped).
  */
 
 export const SVNC_VERSION = '0.1.0-dev';
@@ -35,10 +35,5 @@ export { NullRecognitionProvider, waitFor, clickTarget } from './recognition/stu
 
 export { toKeysym, textToKeysyms } from './utils/keysym.js';
 
-/** @deprecated Phase 1 Wrap — prefer SVNCClient */
-export { NovncLegacyAdapter, createNovncLegacyAdapter } from './adapters/novnc-legacy.js';
-export type { NovncLegacyOptions } from './adapters/novnc-legacy.js';
-
 export { attachHumanInput, eventToDesktopPoint } from './input/human-input.js';
 export type { HumanInputSession } from './input/human-input.js';
-

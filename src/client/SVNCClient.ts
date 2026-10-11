@@ -1,8 +1,8 @@
 /**
- * Public SVNC client facade — lean RFB by default (Phase 2+).
+ * Public SVNC client facade — lean RFB over WebSocket.
  */
 
-import { noRecognitionProvider, SvncError } from '../automation/errors.js';
+import { noRecognitionProvider } from '../automation/errors.js';
 import type {
   AutomationSurface,
   ConnectOptions,
@@ -37,14 +37,6 @@ export class SVNCClient implements AutomationSurface {
   static async connect(target: HTMLElement | null, options: ConnectOptions): Promise<SVNCClient> {
     const session = await RfbSession.connect({ ...options, target });
     return new SVNCClient(session);
-  }
-
-  /** @deprecated Use {@link SVNCClient.connect}; Wrap Spike lives under adapters/novnc-legacy. */
-  static async connectLegacy(): Promise<never> {
-    throw new SvncError(
-      'UNSUPPORTED',
-      'novnc-legacy Wrap path is deprecated; use SVNCClient.connect (lean RFB) or explicit createNovncLegacyAdapter',
-    );
   }
 
   get desktop(): DesktopInfo {

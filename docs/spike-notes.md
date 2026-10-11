@@ -5,7 +5,7 @@
 ## What shipped
 
 - Frozen Automation contract: `src/automation/types.ts` + `SvncError` model
-- Isolated Wrap adapter: `src/adapters/novnc-legacy.ts` (private `_sendMouse` / `RFB.messages` **only here**)
+- Isolated Wrap adapter: moved to `examples/archive/novnc-legacy.ts` (retired from default path)
 - Spike docs + static demo page under `examples/spike/`
 - Local topology: TigerVNC + **upstream websockify** (no SVNC bridge product)
 
@@ -30,4 +30,4 @@ This agent environment did **not** assume a running TigerVNC/websockify stack. I
 
 ## Deprecation
 
-After Phase 2 lean path works, `novnc-legacy` is **deprecated** and optional for contrast only. Runtime dependency on `@novnc/novnc` is **not** required for the default client.
+Phase 2 lean path is default. `novnc-legacy` is archived; **no** `@novnc/novnc` runtime dependency.

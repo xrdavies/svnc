@@ -15,7 +15,7 @@ Inspired by [noVNC](https://github.com/novnc/noVNC), with a lean self-built RFB 
 | Phase | Status |
 |-------|--------|
 | P0 decisions (MIT, `svnc`, Raw→Tight, screenshot-first, non-viewOnly) | Done |
-| P1 Wrap Spike (`novnc-legacy` adapter + frozen types) | Done (live VNC optional) |
+| P1 Wrap Spike (frozen Automation types; Wrap retired) | Done |
 | P2 Lean RFB (WS, none/VNCAuth, Raw, Tight subset, Canvas) | Done (library; live matrix optional) |
 | P3 frame/damage, drag/scroll/dblclick, inputMode, errors, clipboard docs | Done |
 | P4 RecognitionProvider + waitFor/clickTarget stubs + Agent example | Done (no built-in vision — D3) |

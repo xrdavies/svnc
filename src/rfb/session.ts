@@ -209,15 +209,24 @@ export class RfbSession implements AutomationSurface {
   private chooseEncodings(): number[] {
     const preferred = this.opts.preferredEncodings ?? ['raw', 'tight', 'copyrect'];
     const list: number[] = [];
-    for (const p of preferred) {
+    // Raw first when listed — D2 / reliability over bandwidth for Agent screenshots
+    const ordered = [...preferred];
+    if (ordered.includes('raw')) {
+      ordered.splice(ordered.indexOf('raw'), 1);
+      ordered.unshift('raw');
+    }
+    for (const p of ordered) {
       if (p === 'tight') list.push(Encoding.Tight);
       if (p === 'raw') list.push(Encoding.Raw);
       if (p === 'copyrect') list.push(Encoding.CopyRect);
     }
-    // Always advertise CopyRect + desktop size pseudo for sanity
     if (!list.includes(Encoding.CopyRect)) list.push(Encoding.CopyRect);
     if (!list.includes(Encoding.Raw)) list.push(Encoding.Raw);
     list.push(Encoding.DesktopSize);
+    list.push(Encoding.LastRect);
+    // Discourage Tight JPEG (lean path does not decode JPEG yet)
+    list.push(Encoding.QualityLevel0); // -32 → quality 0
+    list.push(Encoding.CompressionLevel0 - 2); // level 2
     return list;
   }
 
@@ -310,6 +319,9 @@ export class RfbSession implements AutomationSurface {
         damage.push(await this.decodeCopyRect(x, y, w, h));
       } else if (encoding === Encoding.Tight) {
         damage.push(await this.decodeTight(x, y, w, h));
+      } else if (encoding === Encoding.Cursor) {
+        // Not advertised by default; if a server still sends it, consume payload and ignore
+        await this.consumeCursorPseudo(w, h);
       } else {
         throw new SvncError('UNSUPPORTED', `Unsupported encoding ${encoding}`, { encoding });
       }
@@ -319,6 +331,14 @@ export class RfbSession implements AutomationSurface {
     if (this._connected) {
       this.sendFramebufferUpdateRequest(true, 0, 0, this._desktop.width, this._desktop.height);
     }
+  }
+
+  /** Drop remote-cursor pseudo-encoding pixels + mask (no local cursor overlay yet). */
+  private async consumeCursorPseudo(w: number, h: number): Promise<void> {
+    const bpp = this.serverPf.bitsPerPixel / 8;
+    const pixels = w * h * bpp;
+    const mask = ((w + 7) >> 3) * h;
+    await this.transport.read(pixels + mask);
   }
 
   private async decodeRaw(x: number, y: number, w: number, h: number): Promise<DamageRect> {
@@ -372,11 +392,23 @@ export class RfbSession implements AutomationSurface {
       const b = color[2] ?? 0;
       return this.display.fillRect(x, y, w, h, r, g, b);
     }
-    // JPEG — not implemented
+    // JPEG — consume payload, soft-skip, ask for a full Raw refresh (do not kill session)
     if ((compControl & 0xf0) === 0x90) {
       const len = await this.readCompactLength();
       await this.transport.read(len);
-      throw new SvncError('UNSUPPORTED', 'Tight JPEG not implemented in lean client');
+      this.bus.emit('error', new SvncError('UNSUPPORTED', 'Tight JPEG skipped; requesting Raw refresh', { x, y, w, h }));
+      // Prefer Raw on next full update
+      this.sendSetEncodings([
+        Encoding.Raw,
+        Encoding.CopyRect,
+        Encoding.Tight,
+        Encoding.DesktopSize,
+        Encoding.LastRect,
+        Encoding.QualityLevel0,
+        Encoding.CompressionLevel0 - 2,
+      ]);
+      this.sendFramebufferUpdateRequest(false, 0, 0, this._desktop.width, this._desktop.height);
+      return { x, y, width: w, height: h };
     }
 
     let filterId = 0;

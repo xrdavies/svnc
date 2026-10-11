@@ -14,17 +14,10 @@
   </head>
   <body>
     <h1>SVNC Spike</h1>
-    <p>Default: lean RFB. Optional: novnc-legacy Wrap (deprecated). Coordinates = remote desktop pixels (no scaleViewport).</p>
+    <p>Lean self-built RFB client. Coordinates = remote desktop pixels (no scaleViewport).</p>
     <div class="row">
       <label>WS URL <input id="url" type="text" value="ws://127.0.0.1:6080/" /></label>
       <label>Password <input id="password" type="password" placeholder="(optional)" /></label>
-      <label>
-        Backend
-        <select id="backend">
-          <option value="lean" selected>lean RFB (default)</option>
-          <option value="novnc">novnc-legacy (deprecated)</option>
-        </select>
-      </label>
       <button id="connect">Connect</button>
       <button id="disconnect" disabled>Disconnect</button>
     </div>

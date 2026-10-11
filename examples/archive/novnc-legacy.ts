@@ -1,10 +1,7 @@
 /**
- * Phase 1 Wrap Spike adapter around `@novnc/novnc`.
- *
- * IMPORTANT: Private noVNC surfaces (`_sendMouse`, `RFB.messages`, etc.) MUST stay
- * inside this file only. Phase 2+ default path is lean `RfbSession` / `SVNCClient`.
- *
- * @deprecated Prefer `SVNCClient.connect`. Kept for spike / regression contrast.
+ * ARCHIVED — Phase 1 Wrap Spike around `@novnc/novnc`.
+ * Not imported by the `svnc` package. Install `@novnc/novnc` yourself if you revive this.
+ * Default path: lean `RfbSession` / `SVNCClient`.
  */
 
 import {

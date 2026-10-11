@@ -91,7 +91,7 @@ flowchart LR
 
 ## 4. Phase 2 — 精简自研 RFB 骨架
 
-**状态：实现已合并（2026-10-12）；默认 `SVNCClient`；Wrap deprecated**
+**状态：实现已合并（2026-10-12）；默认 `SVNCClient`；Wrap **已退役**（无 `@novnc` 依赖）**
 
 **目标：** 替换 Wrap 成为主实现路径；公开 API 形状与 Phase 1 契约对齐；协议面 **裁剪**。
 
@@ -104,7 +104,7 @@ flowchart LR
 | 2.5 输入一等公民 | PointerEvent + KeyEvent；映射到已冻结的 `click` / `typeText` 等 | Phase 1 契约 |
 | 2.6 编码扩展 1 | **Tight**（D2；按 [compat-matrix.md](./compat-matrix.md)） | 2.4 稳定后 |
 | 2.7 对照测试 | 同场景对照 noVNC 像素/输入（手工或半自动）；CI 能起 websockify+VNC 更佳 | 1.1 拓扑 |
-| 2.8 退役 Wrap | Demo 默认切自研；`novnc-legacy` 标 deprecated 或移入 `examples/archive` | 2.5 通过验收 |
+| 2.8 退役 Wrap | ✅ Demo/默认仅 lean RFB；`@novnc/novnc` 已从 package 移除；适配层 → `examples/archive` | 完成 |
 
 **Exit：** 在矩阵「必过」拓扑上，自研客户端独立完成 Phase 1 同级 Demo；不再依赖 `@novnc/novnc` 运行时（可选留作对照）。
 
@@ -212,7 +212,7 @@ Automation types（Phase 1 冻结） ──► Phase 2/3/4 实现不得无故改
 |----------|------|------|
 | TigerVNC 或 x11vnc | 参考 Server | 矩阵必过项 |
 | websockify | WS↔TCP | 独立进程；LGPL |
-| `@novnc/novnc` | 仅 Phase 1 Spike | Phase 2 后可选对照 |
+| `@novnc/novnc` | Phase 1 Spike only | **已移除运行时依赖**；对照见 `examples/archive` |
 | 浏览器 Canvas / WebSocket | 运行时 | 无 Raw TCP |
 
 ---
@@ -272,6 +272,7 @@ Automation types（Phase 1 冻结） ──► Phase 2/3/4 实现不得无故改
 | [build-vs-wrap-decision.md](./build-vs-wrap-decision.md) | 为何 Spike 后自研 |
 | [websockify-decision.md](./websockify-decision.md) | 为何不自研桥 |
 | [novnc-analysis.md](./novnc-analysis.md) | 上游能力边界 |
+| [lean-rfb-gaps.md](./lean-rfb-gaps.md) | 自研 RFB 缺口与缓解 |
 | [compat-matrix.md](./compat-matrix.md) | 首期 Server × Auth × Encoding |
 
 **下一步立刻做：** Phase 5 产品化，或在本地 TigerVNC+websockify 上验收 P1–P3 Demo。

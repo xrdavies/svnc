@@ -35,6 +35,11 @@ export const Encoding = {
   LastRect: -224,
   Cursor: -239,
   ExtendedDesktopSize: -308,
+  /** Request JPEG quality 0–9 via -(32-n); we advertise mid quality then prefer Raw. */
+  QualityLevel0: -32,
+  QualityLevel9: -23,
+  CompressionLevel0: -256,
+  CompressionLevel9: -247,
 } as const;
 
 /** Pointer button bit masks (RFB). */

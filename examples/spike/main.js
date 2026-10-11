@@ -29,12 +29,7 @@ document.getElementById('connect').onclick = async () => {
   try {
     const url = document.getElementById('url').value;
     const password = document.getElementById('password').value;
-    const backend = document.getElementById('backend').value;
     screen.innerHTML = '';
-    if (backend === 'novnc') {
-      log('novnc-legacy requires @novnc/novnc + bundler; use lean RFB in this static demo.');
-      return;
-    }
     client = await SVNCClient.connect(screen, {
       url,
       credentials: password ? { password } : undefined,
