@@ -23,16 +23,17 @@ SVNC（Simple VNC）是一个面向**浏览器网页**的 VNC 客户端库与轻
 
 | 文档 | 说明 |
 |------|------|
+| [docs/roadmap.md](docs/roadmap.md) | **整体路线图**（阶段、工作项、交付物、依赖、风险） |
 | [docs/novnc-analysis.md](docs/novnc-analysis.md) | noVNC 架构、模块、协议栈与自动化能力边界 |
-| [docs/design-proposal.md](docs/design-proposal.md) | 愿景、API 草案、分阶段计划（已对齐目标 1–3） |
+| [docs/design-proposal.md](docs/design-proposal.md) | 愿景、API 草案、分阶段设想（执行顺序以 roadmap 为准） |
 | [docs/build-vs-wrap-decision.md](docs/build-vs-wrap-decision.md) | Wrap / Fork / 自研客户端决策 |
 | [docs/websockify-decision.md](docs/websockify-decision.md) | WebSocket↔TCP 桥：复用 websockify vs 自研 |
 
 ## 当前状态
 
-方案整理阶段：noVNC 分析、设计提案、客户端自研决策、**websockify 复用决策**已就绪。核心代码尚未落地。
+文档阶段收尾：分析、设计、自研决策、websockify 决策与 **[整体路线图](docs/roadmap.md)** 已就绪。核心代码尚未落地。
 
-**下一步建议：** Phase 1 Spike——`websockify + 本地 VNC` 拓扑下，浏览器基础显示 + `screenshot` / `click` / `typeText` API。
+**下一步：** 按 [docs/roadmap.md](docs/roadmap.md) 执行 Phase 0 收尾 → Phase 1 Wrap Spike（`websockify + 本地 VNC` → 显示 + `screenshot` / `click` / `typeText`）。
 
 ## 参考
 

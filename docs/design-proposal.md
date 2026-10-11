@@ -1,7 +1,7 @@
 # SVNC 设计提案：可编程远程操控
 
 > 状态：思路与方案整理（无实现代码）  
-> 依据：[novnc-analysis.md](./novnc-analysis.md)、[build-vs-wrap-decision.md](./build-vs-wrap-decision.md)、[websockify-decision.md](./websockify-decision.md)；产品目标见 §2.0。
+> 依据：[novnc-analysis.md](./novnc-analysis.md)、[build-vs-wrap-decision.md](./build-vs-wrap-decision.md)、[websockify-decision.md](./websockify-decision.md)；产品目标见 §2.0。**执行顺序与里程碑以 [roadmap.md](./roadmap.md) 为准。**
 
 ## 1. 问题陈述
 
@@ -272,6 +272,8 @@ sequenceDiagram
 
 ## 7. 分阶段计划
 
+> 下列为设计阶段草案摘要。**完整工作项、Exit 标准、依赖与风险见 [roadmap.md](./roadmap.md)。**
+
 ### Phase 0 — 文档与对齐（本阶段）
 
 - [x] noVNC 架构与功能分析
@@ -329,6 +331,7 @@ sequenceDiagram
 svnc/
   README.md
   docs/
+    roadmap.md
     novnc-analysis.md
     design-proposal.md
     build-vs-wrap-decision.md
@@ -352,4 +355,4 @@ svnc/
 - SVNC 的差异化在于把 **指针注入、帧事件、自动化门面、可插拔界面识别** 做成稳定产品 API，使「直接操作远端被控软件」成为一等场景。
 - **客户端策略：** 见 [build-vs-wrap-decision.md](./build-vs-wrap-decision.md)——短期 Wrap Spike，中长期精简自研。
 - **传输策略：** 见 [websockify-decision.md](./websockify-decision.md)——**复用 websockify / 原生 WS**；不自研生产级姊妹桥。
-- **下一步：** Phase 1 Spike（websockify + 本地 VNC → 显示 + `screenshot` / `click` / `typeText`），并冻结 Automation 类型。
+- **下一步：** 按 [roadmap.md](./roadmap.md) 做 Phase 0 收尾后进入 Phase 1 Spike（websockify + 本地 VNC → 显示 + `screenshot` / `click` / `typeText`），并冻结 Automation 类型。
