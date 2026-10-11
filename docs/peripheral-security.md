@@ -148,3 +148,13 @@ ssh -L 6080:127.0.0.1:6080 user@jump
 
 - 若某客户拓扑 **无法** 关闭 VeNCrypt-only，开 issue / 更新 [compat-matrix.md](./compat-matrix.md) 增加「调研行」，再决定是否实现。  
 - 不得在未改矩阵的情况下把 VeNCrypt 宣称为「已支持」。
+
+---
+
+## 8. 正式决策状态
+
+本文件结论已提升为路线图 **D7（已关闭）** 与锁定前提 **P7**：
+
+- 见 [roadmap.md §11](./roadmap.md)（D7）与 §0（P7）。
+- [compat-matrix.md](./compat-matrix.md) Auth 行保持 VeNCrypt / RA2 / RFB-TLS = ❌。
+- 变更须先改矩阵 + 路线图，不得在未评审时于客户端宣称支持。

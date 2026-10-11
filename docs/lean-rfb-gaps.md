@@ -33,7 +33,7 @@
 
 | Gap | Reason |
 |-----|--------|
-| **VeNCrypt / RA2 / TLS** | **外围优先**（WSS/VPN/SSH/原生 WSS）；非 SVNC 核心。仅当 Server **强制**该 RFB security type 且无法用外围替代时再评估。见 [peripheral-security.md](./peripheral-security.md)；[compat-matrix](./compat-matrix.md) 保持 ❌ |
+| **VeNCrypt / RA2 / RFB-TLS** | **D7 正式决策：不做默认实现**。外围优先（WSS/VPN/SSH/原生 WSS）。仅当 [compat-matrix](./compat-matrix.md) 新增不可替代强制拓扑时再评估。见 [peripheral-security.md](./peripheral-security.md) |
 | **SetDesktopSize client→server** | Optional follow-on once a product story needs client-initiated layout changes; receive path for ExtendedDesktopSize is done |
 | **Mobile scaleViewport** | Post-MVP (product non-goal) |
 | **Self-built websockify** | Reuse upstream / native WS VNC ([websockify-decision](./websockify-decision.md)) |

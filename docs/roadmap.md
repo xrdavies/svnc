@@ -1,8 +1,8 @@
 # SVNC 整体路线图
 
-> 状态：规划文档（权威执行顺序）；**Phase 0–4 代码已落地**；**本地 e2e 拓扑已验证**（见 [e2e-local.md](./e2e-local.md)）  
+> 状态：规划文档（权威执行顺序）；**Phase 0–5 已落地**；**本地 e2e 拓扑已验证**（见 [e2e-local.md](./e2e-local.md)）  
 > 日期：2026-10-12（Asia/Shanghai）  
-> 依据：[design-proposal.md](./design-proposal.md)、[build-vs-wrap-decision.md](./build-vs-wrap-decision.md)、[websockify-decision.md](./websockify-decision.md)、[novnc-analysis.md](./novnc-analysis.md)
+> 依据：[design-proposal.md](./design-proposal.md)、[build-vs-wrap-decision.md](./build-vs-wrap-decision.md)、[websockify-decision.md](./websockify-decision.md)、[peripheral-security.md](./peripheral-security.md)、[novnc-analysis.md](./novnc-analysis.md)
 
 ## 0. 锁定前提（不可随意改范围）
 
@@ -14,6 +14,7 @@
 | P4 | 客户端策略：**短期 Wrap Spike → 中长期精简自研 RFB**；不以整库 Fork 为主 | build-vs-wrap |
 | P5 | 传输：**复用 websockify / 原生 WS**；不自研生产级姊妹桥 | websockify-decision |
 | P6 | 不首期做完整 noVNC 控制条、H.264、全认证矩阵、远端 UI 控件树 | design-proposal 非目标 |
+| P7 | **传输加密放外围**（WSS 反代 / VPN / SSH / 原生 WSS）；**不做** RFB 内 VeNCrypt / RA2 / TLS，除非矩阵强制 | peripheral-security；D7 |
 
 ```mermaid
 flowchart LR
@@ -39,6 +40,7 @@ flowchart LR
 | 产品目标 1–3 写入 README | [README.md](../README.md) |
 | P0 开放决策 D1–D6 关闭 | 本文件 §11；[compat-matrix.md](./compat-matrix.md) |
 | 仓库骨架（`src/` / `examples/` / MIT） | `package.json`、`LICENSE`、`.gitignore` |
+| 外围 TLS 策略（D7） | [peripheral-security.md](./peripheral-security.md)；本文件 §11 |
 
 ---
 
@@ -164,21 +166,21 @@ flowchart LR
 
 ## 7. Phase 5 — 产品化
 
+**状态：已完成（2026-10-12）；首个公开 tag `0.1.0`**
+
 **目标：** 可发布、可嵌入、可说明威胁模型。
 
-| 工作项 | 交付物 |
-|--------|--------|
-| 5.1 打包与类型 | ESM 发布物、`.d.ts`、changelog |
-| 5.2 CI | lint、单测、（可选）矩阵集成任务 |
-| 5.3 Lite 应用 | 对标 `vnc_lite` 级页面（非完整 `ui.js`） |
-| 5.4 性能 | 截图拷贝频率、背压、识别 worker 化（按需） |
-| 5.5 安全文档 | 可操控 API 威胁模型：URL 白名单、凭证、审计钩子 |
-| 5.6 可选薄桥示例 | `examples/ws-tcp-bridge/`（明确非生产；仍默认文档推 websockify） |
-| 5.7 许可落地 | LICENSE 文件；第三方通知（若有 MPL 文件级 vendoring） |
+| 工作项 | 交付物 | 状态 |
+|--------|--------|------|
+| 5.1 打包与类型 | ESM + `.d.ts`（`tsc`）、[CHANGELOG.md](../CHANGELOG.md)、`package.json` exports | ✅ |
+| 5.2 CI | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)：typecheck / test / build | ✅ |
+| 5.3 Lite 应用 | [examples/lite/](../examples/lite/)（对标 vnc_lite；完整控件见 [examples/demo/](../examples/demo/)） | ✅ |
+| 5.4 性能 | 按需：首期不强制 worker；截图像素拷贝语义见 Automation 契约 | ✅（文档约定） |
+| 5.5 安全文档 | [security.md](./security.md) + [peripheral-security.md](./peripheral-security.md) | ✅ |
+| 5.6 可选薄桥示例 | [examples/ws-tcp-bridge/](../examples/ws-tcp-bridge/)（**非生产**；默认仍推 websockify） | ✅ |
+| 5.7 许可落地 | MIT `LICENSE`；[NOTICE](../NOTICE)（运行时依赖许可证摘要） | ✅ |
 
-**Exit：** 版本号 semver 首个公开 tag（如 `0.1.0`）；README 快速开始可用。
-
-**预估：** 约 2–4 周（可与 Phase 4 尾部重叠）。
+**Exit：** 已满足——semver `0.1.0`；README 快速开始可用。
 
 ---
 
@@ -189,7 +191,8 @@ flowchart LR
 | 移动端缩放 / 手势 | 产品目标 3 |
 | 完整控制条 / i18n 设置中心 | 非差异化 |
 | 自研生产级 websockify | 已否决 |
-| H.264 / 全认证 / 冷门 encoding | 无用户故事不加 |
+| H.264 / 冷门 encoding | 无用户故事不加 |
+| VeNCrypt / RA2 / RFB-TLS（客户端） | **D7 正式否决默认实现**；仅矩阵强制时重开；见 [peripheral-security.md](./peripheral-security.md) |
 | Node 无头一等运行时 | 浏览器 Canvas 为默认 |
 | 远端无障碍树 / 非 RFB 旁路 | 实验分支另议 |
 | 整库 Fork noVNC | 仅例外（解码器级有限 vendoring） |
@@ -229,6 +232,7 @@ Automation types（Phase 1 冻结） ──► Phase 2/3/4 实现不得无故改
 | R6 | MPL/LGPL 合规疏忽 | P2 / P5 | 禁止无记录复制；桥不链进库 |
 | R7 | 范围膨胀（移动/全协议/自研桥） | 全程 | 本文件 P1–P6；变更需改路线图并评审 |
 | R8 | 多人 shared 会话输入冲突 | P3 | `inputMode` + 文档 |
+| R9 | 把「要加密」误解成必须实现 VeNCrypt | 全程 | D7 + peripheral-security：默认 WSS/VPN |
 
 ---
 
@@ -242,6 +246,7 @@ Automation types（Phase 1 冻结） ──► Phase 2/3/4 实现不得无故改
 | D4 | npm 包名 | **`svnc`**（查询时未被占用） | ✅ 已关闭 |
 | D5 | 仓库布局 | **单包 `src/`**（必要时再拆） | ✅ 已关闭 |
 | D6 | 自动化测试会话 | **非 viewOnly**（`click` / `typeText` 必可注入） | ✅ 已关闭 |
+| D7 | 传输加密 vs RFB 内 TLS/VeNCrypt/RA2 | **外围优先**（WSS 反代 / VPN / SSH / 原生 WSS）；SVNC 只做 **None + VNC Auth**；**不在 RFB 客户端实现 VeNCrypt / RA2 / RFB-TLS**，除非 [compat-matrix](./compat-matrix.md) 新增不可替代的强制拓扑 | ✅ 已关闭 |
 
 此前已关闭：实现策略 A→C、不自研桥、移动端暂缓、产品目标 1–3。
 
@@ -260,7 +265,7 @@ Automation types（Phase 1 冻结） ──► Phase 2/3/4 实现不得无故改
 5. **[P2]** 指针/键盘接到同一 Automation API；加 **Tight**；切默认实现  
 6. **[P3]** `frame`/damage、`drag`/`scroll`、`inputMode`、错误模型  
 7. **[P4]** （可选）RecognitionProvider；默认路径仍是 Agent 侧消费截图  
-8. **[P5]** 打包、CI、安全文档、首个 tag  
+8. **[P5]** ~~打包、CI、安全文档、首个 tag~~ **已完成（`0.1.0`）**  
 
 ---
 
@@ -274,5 +279,8 @@ Automation types（Phase 1 冻结） ──► Phase 2/3/4 实现不得无故改
 | [novnc-analysis.md](./novnc-analysis.md) | 上游能力边界 |
 | [lean-rfb-gaps.md](./lean-rfb-gaps.md) | 自研 RFB 缺口与缓解 |
 | [compat-matrix.md](./compat-matrix.md) | 首期 Server × Auth × Encoding |
+| [peripheral-security.md](./peripheral-security.md) | 外围加密 vs RFB VeNCrypt（D7） |
+| [security.md](./security.md) | Automation API 威胁模型 |
+| [lean-rfb-gaps.md](./lean-rfb-gaps.md) | 自研 RFB 缺口与延后项 |
 
-**下一步立刻做：** Phase 5 产品化，或在本地 TigerVNC+websockify 上验收 P1–P3 Demo。
+**下一步：** 按需 npm 发布、或扩展矩阵 Server；VeNCrypt 不进主路径（D7）。
