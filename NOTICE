@@ -1,0 +1,15 @@
+SVNC
+Copyright (c) 2026 Frozen's Ami and contributors
+
+This product is licensed under the MIT License. See LICENSE.
+
+Third-party runtime dependencies (licenses as of 0.1.0):
+
+- fflate — MIT — https://github.com/101arrowz/fflate
+- jpeg-js — BSD-3-Clause — https://github.com/eugeneware/jpeg-js
+
+Development / example tooling may pull additional packages (TypeScript, Vitest, ws, Puppeteer, etc.);
+those are not required to consume the published `dist/` library in a browser that supplies WebSocket + Canvas.
+
+No Mozilla Public License (MPL) noVNC sources are vendored in the default lean RFB path.
+Historical Wrap Spike material under examples/archive/ is not part of the published package surface.

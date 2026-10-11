@@ -173,7 +173,7 @@ flowchart LR
 | 工作项 | 交付物 | 状态 |
 |--------|--------|------|
 | 5.1 打包与类型 | ESM + `.d.ts`（`tsc`）、[CHANGELOG.md](../CHANGELOG.md)、`package.json` exports | ✅ |
-| 5.2 CI | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)：typecheck / test / build | ✅ |
+| 5.2 CI | 工作流定义见 [ci.md](./ci.md)（typecheck / test / build）；若推送账号无 `workflow` scope，由维护者粘贴到 `.github/workflows/ci.yml` | ✅ |
 | 5.3 Lite 应用 | [examples/lite/](../examples/lite/)（对标 vnc_lite；完整控件见 [examples/demo/](../examples/demo/)） | ✅ |
 | 5.4 性能 | 按需：首期不强制 worker；截图像素拷贝语义见 Automation 契约 | ✅（文档约定） |
 | 5.5 安全文档 | [security.md](./security.md) + [peripheral-security.md](./peripheral-security.md) | ✅ |

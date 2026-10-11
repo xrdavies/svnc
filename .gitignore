@@ -31,8 +31,7 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 
-# Package managers
-package-lock.json
+# Package managers (lockfile committed for CI)
 yarn.lock
 pnpm-lock.yaml
 

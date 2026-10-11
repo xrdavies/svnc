@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SVNC Lite</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #111;
+        color: #eee;
+      }
+      #bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        padding: 0.5rem 0.75rem;
+        background: #1b1b1b;
+        border-bottom: 1px solid #333;
+      }
+      #bar input[type='text'],
+      #bar input[type='password'] {
+        min-width: 14rem;
+        padding: 0.35rem 0.5rem;
+        border: 1px solid #444;
+        border-radius: 4px;
+        background: #0a0a0a;
+        color: #eee;
+      }
+      #bar button {
+        padding: 0.35rem 0.75rem;
+        border: 1px solid #555;
+        border-radius: 4px;
+        background: #2a6bed;
+        color: #fff;
+        cursor: pointer;
+      }
+      #bar button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      #status {
+        margin-left: auto;
+        font-size: 0.85rem;
+        color: #9ab;
+      }
+      #screen {
+        display: inline-block;
+        margin: 0.75rem;
+        background: #000;
+        border: 1px solid #333;
+      }
+      #screen canvas {
+        display: block;
+        outline: none;
+      }
+      .hint {
+        padding: 0 0.75rem 0.75rem;
+        font-size: 0.8rem;
+        color: #889;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="bar">
+      <label>
+        URL
+        <input id="url" type="text" value="ws://127.0.0.1:6080/" size="28" />
+      </label>
+      <label>
+        Password
+        <input id="password" type="password" value="svnc-demo" size="12" />
+      </label>
+      <button id="connect" type="button">Connect</button>
+      <button id="disconnect" type="button" disabled>Disconnect</button>
+      <span id="status">disconnected</span>
+    </div>
+    <p class="hint">
+      Minimal viewer (vnc_lite-style). Click the canvas for mouse/keyboard.
+      Full Automation controls: <a href="../demo/" style="color:#6af">examples/demo</a>.
+      Serve repo root after <code>npm run build</code>.
+    </p>
+    <div id="screen"></div>
+    <script type="importmap">
+      {
+        "imports": {
+          "fflate": "/node_modules/fflate/esm/browser.js",
+          "jpeg-js": "/node_modules/jpeg-js/index.js"
+        }
+      }
+    </script>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

@@ -1,10 +1,9 @@
 {
   "name": "svnc",
-  "version": "0.1.0-dev",
-  "description": "Simple VNC — browser VNC client with Agent-friendly screenshot and input APIs",
+  "version": "0.1.0",
+  "description": "Simple VNC \u2014 browser VNC client with Agent-friendly screenshot and input APIs",
   "type": "module",
   "license": "MIT",
-  "private": true,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -17,7 +16,9 @@
     "dist",
     "src",
     "LICENSE",
-    "README.md"
+    "NOTICE",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "repository": {
     "type": "git",
@@ -43,13 +44,13 @@
     "e2e:start": "./scripts/local-e2e/start.sh",
     "e2e:stop": "./scripts/local-e2e/stop.sh",
     "e2e:status": "./scripts/local-e2e/status.sh",
-    "e2e:verify": "node scripts/local-e2e/verify-protocol.mjs && node scripts/local-e2e/verify-browser.mjs"
+    "e2e:verify": "node scripts/local-e2e/verify-protocol.mjs && node scripts/local-e2e/verify-browser.mjs",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "devDependencies": {
     "@types/jpeg-js": "^0.3.7",
     "@types/node": "^22.10.0",
     "happy-dom": "^20.14.6",
-    "jpeg-js": "^0.4.4",
     "puppeteer-core": "^24.43.1",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8",
@@ -59,6 +60,11 @@
     "node": ">=18"
   },
   "dependencies": {
-    "fflate": "^0.8.3"
-  }
+    "fflate": "^0.8.3",
+    "jpeg-js": "^0.4.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false
 }

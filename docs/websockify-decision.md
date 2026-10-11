@@ -12,7 +12,7 @@
 |------|------|
 | 上游 Python [websockify](https://github.com/novnc/websockify)（或兼容 drop-in） | **默认复用**，文档与 Demo 里写清如何启动 |
 | 原生 WebSocket 的 VNC Server（若目标环境有） | **优先**：可完全省掉桥 |
-| 仓库内超薄 Node/Go 转发 Demo（~百行级） | **可选**，仅本地/CI 便利，不复制 token/auth/LD_PRELOAD 等全家桶 |
+| 仓库内超薄 Node/Go 转发 Demo（~百行级） | **可选**，见 [examples/ws-tcp-bridge/](../examples/ws-tcp-bridge/)；仅本地/CI 便利，不复制 token/auth/LD_PRELOAD 等全家桶 |
 | 自研并长期维护姊妹「svnc-websockify」产品 | **不做**（除非未来有明确生产运维缺口且上游不可用） |
 
 SVNC **客户端**只依赖标准浏览器 WebSocket（二进制帧里跑 RFB 字节流）。桥在服务端侧；与 noVNC 历史姊妹关系 **不等于** 库代码耦合。

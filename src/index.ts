@@ -4,7 +4,7 @@
  * Historical Wrap Spike lives under examples/archive/novnc-legacy.ts (not shipped).
  */
 
-export const SVNC_VERSION = '0.1.0-dev';
+export const SVNC_VERSION = '0.1.0';
 
 export { SVNCClient } from './client/SVNCClient.js';
 export type { SVNCClientOptions } from './client/SVNCClient.js';

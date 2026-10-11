@@ -13,7 +13,7 @@
 | Static HTTP | `127.0.0.1:8080` | Serves repo root (demo + `dist/`) |
 
 - **Password:** `svnc-demo` (file `.local-e2e/vnc.pass`, gitignored)
-- **Demo URL:** http://127.0.0.1:8080/examples/demo/
+- **Demo URL:** http://127.0.0.1:8080/examples/demo/ (full UI) or http://127.0.0.1:8080/examples/lite/ (minimal)
 - **WS URL:** `ws://127.0.0.1:6080/`
 
 ## Start / stop
