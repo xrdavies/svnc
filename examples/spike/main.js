@@ -40,6 +40,7 @@ document.getElementById('connect').onclick = async () => {
       credentials: password ? { password } : undefined,
       viewOnly: false,
       shared: true,
+      preferredEncodings: ['raw', 'tight', 'copyrect'],
     });
     client.on('frame', () => {
       /* optional: Agent can hook frame events here */

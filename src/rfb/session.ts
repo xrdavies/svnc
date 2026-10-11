@@ -191,7 +191,7 @@ export class RfbSession implements AutomationSurface {
   }
 
   private chooseEncodings(): number[] {
-    const preferred = this.opts.preferredEncodings ?? ['tight', 'raw', 'copyrect'];
+    const preferred = this.opts.preferredEncodings ?? ['raw', 'tight', 'copyrect'];
     const list: number[] = [];
     for (const p of preferred) {
       if (p === 'tight') list.push(Encoding.Tight);
@@ -364,28 +364,72 @@ export class RfbSession implements AutomationSurface {
     }
 
     let filterId = 0;
+    let palette: Array<[number, number, number]> | null = null;
     if (filterIdBit) {
       filterId = (await this.transport.read(1))[0]!;
+      if (filterId === 1) {
+        // Palette filter: palette precedes zlib payload (TPIXEL = 3 bytes).
+        const paletteSize = (await this.transport.read(1))[0]! + 1;
+        palette = [];
+        for (let i = 0; i < paletteSize; i++) {
+          const c = await this.transport.read(3);
+          palette.push([c[0]!, c[1]!, c[2]!]);
+        }
+      }
+    }
+
+    // Expected uncompressed length for copy / palette index data
+    let expected = w * h * 3;
+    if (filterId === 1 && palette) {
+      expected = palette.length === 2 ? ((w + 7) >> 3) * h : w * h;
     }
 
     const len = await this.readCompactLength();
     let raw = await this.transport.read(len);
-    // zlib when length suggests compression (Tight basic compression)
-    if (len >= 12 || (compControl & 0x0f) !== 0x08) {
+    // Tight: uncompressed when high nibble uses "no zlib" (0x0A << 4) pattern,
+    // or when declared length already equals expected size.
+    const noZlib = ((compControl >> 4) & 0x0f) === 0x0a;
+    if (!noZlib && len !== expected) {
       const streamId = compControl & 0x03;
       raw = await this.inflateBytes(streamId, raw);
     }
 
     if (filterId === 0) {
-      // Copy filter — uncompressed TPIXEL RGB888
       return this.display.blitRgb(x, y, w, h, raw, 3, 'rgb');
     }
-    if (filterId === 1) {
-      // Palette — skip detailed for now
-      throw new SvncError('UNSUPPORTED', 'Tight palette filter not implemented');
+    if (filterId === 1 && palette) {
+      const rgb = new Uint8Array(w * h * 3);
+      if (palette.length === 2) {
+        let src = 0;
+        for (let row = 0; row < h; row++) {
+          let bit = 0;
+          let byte = 0;
+          for (let col = 0; col < w; col++) {
+            if (bit === 0) {
+              byte = raw[src++] ?? 0;
+              bit = 8;
+            }
+            bit--;
+            const idx = (byte >> bit) & 1;
+            const [r, g, b] = palette[idx]!;
+            const di = (row * w + col) * 3;
+            rgb[di] = r;
+            rgb[di + 1] = g;
+            rgb[di + 2] = b;
+          }
+        }
+      } else {
+        for (let i = 0; i < w * h; i++) {
+          const idx = raw[i] ?? 0;
+          const [r, g, b] = palette[idx] ?? palette[0]!;
+          rgb[i * 3] = r;
+          rgb[i * 3 + 1] = g;
+          rgb[i * 3 + 2] = b;
+        }
+      }
+      return this.display.blitRgb(x, y, w, h, rgb, 3, 'rgb');
     }
     if (filterId === 2) {
-      // Gradient — treat as raw RGB for MVP if length matches
       if (raw.byteLength >= w * h * 3) {
         return this.display.blitRgb(x, y, w, h, raw, 3, 'rgb');
       }
