@@ -2,46 +2,17 @@
 
 GitHub Actions workflow for this repo (typecheck / test / build on `main` and PRs).
 
-> The `ami-iy` bot token used for some pushes may lack the OAuth **`workflow`** scope, so `.github/workflows/ci.yml` might need to be added by a maintainer (`xrdavies`) or after granting that scope.
+Workflow file: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
 
-## Workflow file
+## Workflow
 
-Create `.github/workflows/ci.yml` with:
+Runs on pushes and pull requests to `main`:
 
-```yaml
-name: CI
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-
-      - name: Install
-        run: npm ci
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Test
-        run: npm test
-
-      - name: Build
-        run: npm run build
-```
+1. Checkout
+2. Setup Node 20 (npm cache)
+3. `npm ci`
+4. `npm run typecheck`
+5. `npm test`
+6. `npm run build`
 
 Local equivalent: `npm ci && npm run typecheck && npm test && npm run build`.
