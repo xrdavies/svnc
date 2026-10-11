@@ -57,15 +57,15 @@ flowchart LR
   ref --> svnc
 ```
 
-**策略建议（待决策）：**
+**策略决策（已收紧，详见 [build-vs-wrap-decision.md](./build-vs-wrap-decision.md)）：**
 
-| 策略 | 优点 | 风险 |
-|------|------|------|
-| A. 依赖 `@novnc/novnc`，外包一层 Automation API | 最快验证；复用解码与握手 | 指针仍可能要碰私有 `_sendMouse`；升级 fragile |
-| B. Fork / vendoring 后扩展公开 API | 可正式导出 `sendPointer` 等 | 许可（MPL-2.0）与长期同步成本 |
-| C. 自研精简 RFB 客户端，行为对齐 noVNC | API 形状完全自主 | 工程量大，编码/认证覆盖慢 |
+| 策略 | 优点 | 风险 | 地位 |
+|------|------|------|------|
+| A. 依赖 `@novnc/novnc`，外包一层 Automation API | 最快验证；复用解码与握手 | 指针可能碰私有 `_sendMouse`；无 frame 事件；升级 fragile | **短期 Spike only** |
+| B. 整库 Fork / vendoring 后扩展公开 API | 可正式导出 `sendPointer` 等 | MPL-2.0 与长期 rebase；与上游目标分叉 | **例外**（或仅 decoder 级有限 vendoring） |
+| C. 自研精简 RFB 客户端，行为对齐 / 借鉴 noVNC | API 形状完全自主；可现代 TS 工具链；避开历史 UI 债 | 工程量取决于协议裁剪；早期兼容性需自测 | **中长期默认主路径** |
 
-**提案默认路径：** 短期 **A 做原型**（验证自动化闭环）→ 中期按需进入 **B 或 C**（把 Pointer/Frame 做成稳定契约）。文档阶段不锁定实现，但 API 形态按「最终要稳定」来设计。
+**默认路径：** 短期 **A（可丢弃适配层）** 验证「截图 → 识别 → click/type」→ 中期进入 **C**（Pointer / Frame 为一等契约）。**不以长期 B 为主战略。** API 形态仍按「最终要稳定」设计。
 
 ## 4. 逻辑架构
 
@@ -255,7 +255,8 @@ sequenceDiagram
 
 - [x] noVNC 架构与功能分析
 - [x] SVNC 愿景与 API 草案
-- [ ] 与仓库所有者确认：实现策略 A/B/C、许可证、首期识别 Provider 优先级
+- [x] 实现策略决策：A Spike → C 自研为主（见 [build-vs-wrap-decision.md](./build-vs-wrap-decision.md)）
+- [ ] 与仓库所有者确认：许可证、首期识别 Provider 优先级、首期 Server/Encoding 矩阵
 
 ### Phase 1 — 最小可操控客户端（MVP）
 
@@ -289,7 +290,7 @@ sequenceDiagram
 
 | # | 问题 | 备注 |
 |---|------|------|
-| Q1 | 实现策略选 A/B/C？ | 影响进度与许可合规 |
+| Q1 | 实现策略选 A/B/C？ | **已决策**：A Spike → C 主路径；B 为例外（见 build-vs-wrap-decision） |
 | Q2 | 首期是否必须浏览器 DOM？是否要 Node/无头？ | 影响 Display 后端 |
 | Q3 | 识别默认做本地插件还是纯远端 API？ | 包体积与隐私 |
 | Q4 | `typeText` 在 Windows/Linux/macOS 远端的 IME / 快捷键差异如何处理？ | 可能需要 per-OS profile |
@@ -306,6 +307,7 @@ svnc/
   docs/
     novnc-analysis.md
     design-proposal.md
+    build-vs-wrap-decision.md
   packages/   # 或 src/
     client/   # 连接与 RFB
     automation/
@@ -319,6 +321,6 @@ svnc/
 
 ## 10. 结论
 
-- noVNC 提供了坚实的 **RFB-over-WebSocket 显示与人工输入** 基础，并已有 **读屏 + sendKey** 可编程雏形。
+- noVNC 提供了坚实的 **RFB-over-WebSocket 显示与人工输入** 基础，并已有 **读屏 + sendKey** 可编程雏形；但上游发布约一年一版、公开 API 不对齐自动化，不宜作为长期唯一实现依赖。
 - SVNC 的差异化在于把 **指针注入、帧事件、自动化门面、可插拔界面识别** 做成稳定产品 API，使「直接操作远端被控软件」成为一等场景。
-- 下一步：确认 Q1–Q3 后启动 Phase 1 MVP（坐标点击 + 截图 + 打字 Demo）。
+- **实现策略：** 见 [build-vs-wrap-decision.md](./build-vs-wrap-decision.md)——短期 Wrap Spike，中长期精简自研；下一步确认 Q2–Q3 与兼容性矩阵后启动 Phase 1。

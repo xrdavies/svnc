@@ -10,10 +10,11 @@ SVNC（Simple VNC）是一个面向前端网页的 VNC 客户端库与应用，�
 |------|------|
 | [docs/novnc-analysis.md](docs/novnc-analysis.md) | noVNC 架构、模块、协议栈与功能盘点（含对自动化的能力边界） |
 | [docs/design-proposal.md](docs/design-proposal.md) | SVNC 愿景、与 noVNC 的差异、可编程 API 方案与分阶段计划 |
+| [docs/build-vs-wrap-decision.md](docs/build-vs-wrap-decision.md) | 对照 noVNC 维护节奏与历史债：Wrap / Fork / 自研决策（**推荐精简自研为主，短期 Wrap Spike**） |
 
 ## 当前状态
 
-仓库处于**思路与方案整理**阶段：已完成 noVNC 分析与 SVNC 设计提案，尚未落地核心代码。
+仓库处于**思路与方案整理**阶段：已完成 noVNC 分析、SVNC 设计提案，以及 [Wrap vs 自研决策](docs/build-vs-wrap-decision.md)。**实现策略：短期薄包装 noVNC 做自动化 Spike，中长期以 noVNC 为蓝本精简自研 RFB 客户端（不默认整库 Fork）。** 尚未落地核心代码。
 
 ## 参考
 
