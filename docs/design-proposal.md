@@ -281,7 +281,7 @@ sequenceDiagram
 - [x] 产品目标锁定：浏览器基础 VNC + Agent API；移动端暂缓
 - [x] 实现策略决策：A Spike → C 自研为主（见 [build-vs-wrap-decision.md](./build-vs-wrap-decision.md)）
 - [x] 传输决策：复用 websockify / 可选原生 WS；不自研姊妹桥（见 [websockify-decision.md](./websockify-decision.md)）
-- [ ] 与仓库所有者确认：许可证、首期识别 Provider 优先级、首期 Server/Encoding 矩阵
+- [x] P0 决策关闭：MIT；仅截图 API（无内置识别）；TigerVNC + none/VNC Auth + Raw→Tight；npm `svnc`；单包 `src/`；非 viewOnly（见 [roadmap.md](./roadmap.md) §11、[compat-matrix.md](./compat-matrix.md)）
 
 ### Phase 1 — 最小可操控客户端（MVP）
 
@@ -317,36 +317,37 @@ sequenceDiagram
 |---|------|------|
 | Q1 | 实现策略选 A/B/C？ | **已决策**：A Spike → C 主路径；B 为例外（见 build-vs-wrap-decision） |
 | Q2 | 首期是否必须浏览器 DOM？是否要 Node/无头？ | 影响 Display 后端 |
-| Q3 | 识别默认做本地插件还是纯远端 API？ | 包体积与隐私 |
+| Q3 | 识别默认做本地插件还是纯远端 API？ | **已决策（D3）**：首期无内置识别；Agent 消费截图 API |
 | Q4 | `typeText` 在 Windows/Linux/macOS 远端的 IME / 快捷键差异如何处理？ | 可能需要 per-OS profile |
 | Q5 | 多客户端共享同一 VNC 会话时的输入冲突 | `shared` 标志与 `inputMode` |
 | Q6 | 是否提供「仅数据通道、无像素」的旁路（如 RDP 控件树、辅助功能 API）？ | 超出经典 VNC，可作为实验分支 |
-| Q7 | 许可证：自研 MIT/Apache vs 衍生 MPL | 法律评审 |
-| Q8 | 与现有项目名 / npm 名 `svnc` 是否冲突 | 发布前检查 |
+| Q7 | 许可证：自研 MIT/Apache vs 衍生 MPL | **已决策（D1）：MIT** |
+| Q8 | 与现有项目名 / npm 名 `svnc` 是否冲突 | **已决策（D4）：`svnc`**（查询时可用） |
 | Q9 | 是否自研 WebSocket↔TCP 桥？ | **已决策：否**；复用 websockify / 原生 WS / 可选薄 Demo 桥 |
 
-## 9. 建议的仓库布局（实现阶段）
+## 9. 仓库布局（D5：单包 `src/`）
 
 ```text
 svnc/
   README.md
+  LICENSE                 # MIT
+  package.json            # name: svnc
   docs/
     roadmap.md
+    compat-matrix.md
     novnc-analysis.md
     design-proposal.md
     build-vs-wrap-decision.md
     websockify-decision.md
-  packages/   # 或 src/
-    client/   # 连接与 RFB（WebSocket 传输）
-    automation/
-    recognition-providers/
+  src/                    # 单包源码（后续可再拆）
+    index.ts
+    adapters/             # Phase 1 novnc-legacy 等
   examples/
-    lite-demo/          # 浏览器基础 VNC + API 按钮
-    ws-tcp-bridge/      # 可选超薄桥（非必须）
-  tests/
+    spike/                # Phase 1 Wrap Spike
+  tests/                  # 后续
 ```
 
-当前仅落地 `README.md` 与 `docs/*`。
+骨架已落地；客户端实现属 Phase 1+。
 
 ## 10. 结论
 
@@ -355,4 +356,5 @@ svnc/
 - SVNC 的差异化在于把 **指针注入、帧事件、自动化门面、可插拔界面识别** 做成稳定产品 API，使「直接操作远端被控软件」成为一等场景。
 - **客户端策略：** 见 [build-vs-wrap-decision.md](./build-vs-wrap-decision.md)——短期 Wrap Spike，中长期精简自研。
 - **传输策略：** 见 [websockify-decision.md](./websockify-decision.md)——**复用 websockify / 原生 WS**；不自研生产级姊妹桥。
-- **下一步：** 按 [roadmap.md](./roadmap.md) 做 Phase 0 收尾后进入 Phase 1 Spike（websockify + 本地 VNC → 显示 + `screenshot` / `click` / `typeText`），并冻结 Automation 类型。
+- **许可证 / 包名 / 布局 / 识别范围：** 见 roadmap §11（均已关闭）。
+- **下一步：** 按 [roadmap.md](./roadmap.md) 进入 Phase 1 Spike（TigerVNC + websockify → 显示 + `screenshot` / `click` / `typeText`），并冻结 Automation 类型。

@@ -1,6 +1,6 @@
 # SVNC 整体路线图
 
-> 状态：规划文档（权威执行顺序）  
+> 状态：规划文档（权威执行顺序）；**Phase 0 决策已关闭**  
 > 日期：2026-10-12（Asia/Shanghai）  
 > 依据：[design-proposal.md](./design-proposal.md)、[build-vs-wrap-decision.md](./build-vs-wrap-decision.md)、[websockify-decision.md](./websockify-decision.md)、[novnc-analysis.md](./novnc-analysis.md)
 
@@ -37,24 +37,25 @@ flowchart LR
 | Wrap / Fork / 自研决策 | [build-vs-wrap-decision.md](./build-vs-wrap-decision.md) |
 | websockify 复用决策 | [websockify-decision.md](./websockify-decision.md) |
 | 产品目标 1–3 写入 README | [README.md](../README.md) |
+| P0 开放决策 D1–D6 关闭 | 本文件 §11；[compat-matrix.md](./compat-matrix.md) |
+| 仓库骨架（`src/` / `examples/` / MIT） | `package.json`、`LICENSE`、`.gitignore` |
 
 ---
 
-## 2. Phase 0 — 开工对齐（收尾）
+## 2. Phase 0 — 开工对齐（**已完成**）
 
 **目标：** 把「还差一纸确认」的事项定下来，避免 Spike 中途改许可证或 Server 矩阵。
 
-| 工作项 | 交付物 | 依赖 | 负责人建议 |
-|--------|--------|------|------------|
-| 0.1 确认许可证意向（自研倾向 MIT/Apache-2.0；不乱拷 MPL 文件） | 一句写入 README / 本文件「开放决策」关闭或标注待法务 | — | Frozen |
-| 0.2 锁定首期 **Server × Auth × Encoding** 矩阵（建议：TigerVNC + none/VNC Auth + Raw，再加 Tight 或 ZRLE 其一） | `docs/compat-matrix.md`（可先表格 stub） | websockify Demo 拓扑 | 实现前 Frozen 拍板 |
-| 0.3 确认首期 Recognition 优先级（模板 / OCR / HTTP Vision 谁先） | 本路线图 §开放决策关闭一项 | — | Frozen |
-| 0.4 仓库骨架目录（空包可接受） | `packages/` 或 `src/` + `examples/` 占位 + `.gitignore` | — | ami-iy |
-| 0.5 npm 名 `svnc` 冲突检查 | 记录到开放决策 | — | ami-iy |
+| 工作项 | 交付物 | 状态 |
+|--------|--------|------|
+| 0.1 许可证 | README + `LICENSE`：**MIT**（D1） | ✅ |
+| 0.2 Server × Auth × Encoding | [compat-matrix.md](./compat-matrix.md)：TigerVNC + none/VNC Auth + **Raw**，下一步 **Tight** | ✅ |
+| 0.3 Recognition 首期范围 | **不做内置识别**；仅 **截图 API** 交给外部 AI Agent（D3） | ✅ |
+| 0.4 仓库骨架 | 单包 `src/` + `examples/` + `.gitignore` + `package.json`（D5） | ✅ |
+| 0.5 npm 名 | **`svnc`**（查询时未被占用）（D4） | ✅ |
+| 0.6 自动化会话 | 非 **viewOnly**（D6） | ✅ |
 
-**Exit：** 矩阵至少有一条「必过」拓扑；许可证有默认假设；可开始 Phase 1 编码。
-
-**预估：** 0.5–1 天（可与 Phase 1 并行前半）。
+**Exit：** 已满足——矩阵有必过拓扑；许可证已定；可开始 Phase 1 编码。
 
 ---
 
@@ -69,7 +70,7 @@ flowchart LR
 | 1.3 基础显示 | 浏览器页可连接、渲染桌面 | 1.1 |
 | 1.4 Automation MVP | `screenshot` / `toDataURL`、`moveTo`、`click`、`keyPress`、`typeText` | 1.2–1.3 |
 | 1.5 Demo 控件 | 按钮：截图下载、按坐标点击、输入字符串 | 1.4 |
-| 1.6 冻结契约 | `packages/automation/types.ts`（或 `docs/api-draft.d.ts`）：坐标空间=远端桌面像素；错误：未连接 / viewOnly / 越界 | design-proposal §5 |
+| 1.6 冻结契约 | `src/automation/types.ts`（或 `docs/api-draft.d.ts`）：坐标空间=远端桌面像素；错误：未连接 / viewOnly / 越界；会话非 viewOnly（D6） | design-proposal §5 |
 | 1.7 Spike 验收笔记 | 简短 `docs/spike-notes.md`：踩坑、是否触发晋级自研 | 1.4–1.6 |
 
 **Exit（晋级 Phase 2）：**
@@ -97,7 +98,7 @@ flowchart LR
 | 2.3 握手最小集 | ProtocolVersion → Security **none + VNC Auth** → Client/ServerInit | compat-matrix |
 | 2.4 显示最小集 | FramebufferUpdate **Raw**（优先）；Canvas Display | 2.2–2.3 |
 | 2.5 输入一等公民 | PointerEvent + KeyEvent；映射到已冻结的 `click` / `typeText` 等 | Phase 1 契约 |
-| 2.6 编码扩展 1 | Tight **或** ZRLE 其一（按矩阵） | 2.4 稳定后 |
+| 2.6 编码扩展 1 | **Tight**（D2；按 [compat-matrix.md](./compat-matrix.md)） | 2.4 稳定后 |
 | 2.7 对照测试 | 同场景对照 noVNC 像素/输入（手工或半自动）；CI 能起 websockify+VNC 更佳 | 1.1 拓扑 |
 | 2.8 退役 Wrap | Demo 默认切自研；`novnc-legacy` 标 deprecated 或移入 `examples/archive` | 2.5 通过验收 |
 
@@ -132,23 +133,24 @@ flowchart LR
 
 ---
 
-## 6. Phase 4 — Recognition 插件
+## 6. Phase 4 — Recognition 插件（可选；首期不做）
 
 **目标：** 可插拔界面识别，打通 `waitFor` / `clickTarget`。
 
+**Phase 0 已定（D3）：** 首期 **不做内置识别**。Agent 通过 **`screenshot` / `toDataURL`** 自行分析与决策；本 Phase 延后到确有内置 Provider 需求时再开。
+
 | 工作项 | 交付物 |
 |--------|--------|
-| 4.1 `RecognitionProvider` 接口 | 与 design-proposal §5.4 对齐并定稿 |
-| 4.2 参考实现 A | 按 Phase 0 优先级：模板匹配 **或** OCR **或** HTTP Vision（先做 1 个） |
-| 4.3 参考实现 B（可选） | 第二个 Provider，证明可插拔 |
-| 4.4 门面 API | `find` / `waitFor` / `clickTarget` |
-| 4.5 Agent 示例 | 「识别 → 点击 → 输入」端到端示例（演示级） |
+| 4.1 `RecognitionProvider` 接口 | 与 design-proposal §5.4 对齐并定稿（可选） |
+| 4.2 参考实现（可选） | 模板 / OCR / HTTP Vision 择一，证明可插拔 |
+| 4.3 门面 API | `find` / `waitFor` / `clickTarget` |
+| 4.4 Agent 示例 | 「截图 →（外部 Agent）→ 点击 / 输入」端到端示例 |
 
-**Exit：** 外部 Agent 只依赖公开 API + 一个 Provider 实现即可跑通登录类 Demo。
+**Exit：** 外部 Agent 仅用公开截图 + 输入 API 即可闭环；内置 Provider 非门禁。
 
-**原则：** 库不内置重模型；HTTP Vision 优先时可零本地 CV 依赖。
+**原则：** 库不内置重模型；识别逻辑默认在 Agent 侧。
 
-**预估：** 约 2–3 周。
+**预估：** 约 2–3 周（有需求时）。
 
 ---
 
@@ -222,18 +224,20 @@ Automation types（Phase 1 冻结） ──► Phase 2/3/4 实现不得无故改
 
 ---
 
-## 11. 开放决策（需 Frozen 拍板）
+## 11. 开放决策（**已关闭**）
 
-| ID | 问题 | 建议默认 | 状态 |
-|----|------|----------|------|
-| D1 | 自研代码许可证 | Apache-2.0 或 MIT | 待定 |
-| D2 | 首期 Encoding 第二优先（Tight vs ZRLE） | 看 TigerVNC 默认协商，择一 | 待定 |
-| D3 | 首个 Recognition Provider | HTTP Vision（最易接 Agent）或 OCR | 待定 |
-| D4 | 包名 / npm 名是否 `svnc` | 发布前查询；冲突则 `@…/svnc` | 待查 |
-| D5 | 仓库布局 monorepo vs 单包 | 单包 `src/` 起步，必要时再拆 | 建议默认 |
-| D6 | Phase 1 是否允许 viewOnly 自动化测试机 | 自动化机用非 viewOnly | 建议默认 |
+| ID | 问题 | 决定 | 状态 |
+|----|------|------|------|
+| D1 | 自研代码许可证 | **MIT**（`LICENSE` + `package.json`） | ✅ 已关闭 |
+| D2 | Raw 之后 Encoding 第二优先 | **Tight**（ZRLE 不进首期第二优先） | ✅ 已关闭 |
+| D3 | 首期 Recognition | **不做内置识别**；仅提供 **截图 API**，由外部 AI Agent 分析决策 | ✅ 已关闭 |
+| D4 | npm 包名 | **`svnc`**（查询时未被占用） | ✅ 已关闭 |
+| D5 | 仓库布局 | **单包 `src/`**（必要时再拆） | ✅ 已关闭 |
+| D6 | 自动化测试会话 | **非 viewOnly**（`click` / `typeText` 必可注入） | ✅ 已关闭 |
 
-已关闭：实现策略 A→C、不自研桥、移动端暂缓、产品目标 1–2。
+此前已关闭：实现策略 A→C、不自研桥、移动端暂缓、产品目标 1–3。
+
+兼容矩阵 stub：[compat-matrix.md](./compat-matrix.md)（TigerVNC + none/VNC Auth + Raw，下一步 Tight）。
 
 ---
 
@@ -241,14 +245,14 @@ Automation types（Phase 1 冻结） ──► Phase 2/3/4 实现不得无故改
 
 可直接当看板：
 
-1. **[P0]** 拍板 D1–D3（可先口头默认）；写 `compat-matrix` stub；建目录骨架  
-2. **[P1]** 拉起 `VNC + websockify`；Wrap Demo：显示 + screenshot/click/typeText  
-3. **[P1]** 提交并冻结 Automation `.ts` 类型；写 spike-notes  
+1. **[P0]** ~~拍板 D1–D6；compat-matrix；骨架~~ **已完成**  
+2. **[P1]** 拉起 `TigerVNC + websockify`；Wrap Demo：显示 + screenshot/click/typeText（非 viewOnly）  
+3. **[P1]** 提交并冻结 Automation `.ts` 类型于 `src/`；写 spike-notes  
 4. **[P2]** TS 脚手架 + Transport + none/VNCAuth + Raw + Canvas  
-5. **[P2]** 指针/键盘接到同一 Automation API；加 Tight 或 ZRLE；切默认实现  
+5. **[P2]** 指针/键盘接到同一 Automation API；加 **Tight**；切默认实现  
 6. **[P3]** `frame`/damage、`drag`/`scroll`、`inputMode`、错误模型  
-7. **[P4]** RecognitionProvider + 1 个参考实现 + `waitFor`/`clickTarget` 示例  
-8. **[P5]** 打包、CI、安全文档、LICENSE、首个 tag  
+7. **[P4]** （可选）RecognitionProvider；默认路径仍是 Agent 侧消费截图  
+8. **[P5]** 打包、CI、安全文档、首个 tag  
 
 ---
 
@@ -260,5 +264,6 @@ Automation types（Phase 1 冻结） ──► Phase 2/3/4 实现不得无故改
 | [build-vs-wrap-decision.md](./build-vs-wrap-decision.md) | 为何 Spike 后自研 |
 | [websockify-decision.md](./websockify-decision.md) | 为何不自研桥 |
 | [novnc-analysis.md](./novnc-analysis.md) | 上游能力边界 |
+| [compat-matrix.md](./compat-matrix.md) | 首期 Server × Auth × Encoding |
 
-**下一步立刻做：** Phase 0 收尾 + Phase 1 Spike 开工（见 §12 第 1–3 步）。
+**下一步立刻做：** Phase 1 Wrap Spike 开工（见 §12 第 2–3 步）。

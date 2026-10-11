@@ -24,6 +24,7 @@ SVNC（Simple VNC）是一个面向**浏览器网页**的 VNC 客户端库与轻
 | 文档 | 说明 |
 |------|------|
 | [docs/roadmap.md](docs/roadmap.md) | **整体路线图**（阶段、工作项、交付物、依赖、风险） |
+| [docs/compat-matrix.md](docs/compat-matrix.md) | 首期 Server × Auth × Encoding 兼容矩阵 |
 | [docs/novnc-analysis.md](docs/novnc-analysis.md) | noVNC 架构、模块、协议栈与自动化能力边界 |
 | [docs/design-proposal.md](docs/design-proposal.md) | 愿景、API 草案、分阶段设想（执行顺序以 roadmap 为准） |
 | [docs/build-vs-wrap-decision.md](docs/build-vs-wrap-decision.md) | Wrap / Fork / 自研客户端决策 |
@@ -31,9 +32,20 @@ SVNC（Simple VNC）是一个面向**浏览器网页**的 VNC 客户端库与轻
 
 ## 当前状态
 
-文档阶段收尾：分析、设计、自研决策、websockify 决策与 **[整体路线图](docs/roadmap.md)** 已就绪。核心代码尚未落地。
+**Phase 0 已关闭**（MIT、`svnc` 包名、单包 `src/`、仅截图 API、TigerVNC + Raw→Tight、非 viewOnly）。仓库骨架已就位；核心客户端尚未落地。
 
-**下一步：** 按 [docs/roadmap.md](docs/roadmap.md) 执行 Phase 0 收尾 → Phase 1 Wrap Spike（`websockify + 本地 VNC` → 显示 + `screenshot` / `click` / `typeText`）。
+**下一步：** 按 [docs/roadmap.md](docs/roadmap.md) 进入 **Phase 1 Wrap Spike**（`TigerVNC + websockify` → 显示 + `screenshot` / `click` / `typeText`）。
+
+## 仓库布局（起步）
+
+```text
+svnc/
+  src/           # 单包源码（D5）
+  examples/      # Spike / Demo 占位
+  docs/          # 路线图与决策
+  package.json   # name: svnc, license: MIT
+  LICENSE
+```
 
 ## 参考
 
@@ -43,4 +55,6 @@ SVNC（Simple VNC）是一个面向**浏览器网页**的 VNC 客户端库与轻
 
 ## 许可证
 
-待定（实现阶段确定；客户端参考 noVNC 多为 MPL-2.0；websockify 为 LGPL-3.0，建议以独立进程复用）。
+**MIT**（自研代码，见 [LICENSE](LICENSE)）。
+
+说明：上游 **noVNC** 多为 MPL-2.0——Wrap Spike 仅作运行时依赖 / 适配层，不整段拷贝进本仓库发布物；**websockify** 为 LGPL-3.0，以**独立进程**复用，不链进本库。
