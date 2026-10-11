@@ -1,60 +1,60 @@
-# SVNC — Simple VNC
+# SVNC
 
-SVNC（Simple VNC）是一个面向**浏览器网页**的 VNC 客户端库与轻量应用：在提供基础远程桌面能力的同时，暴露**可编程的界面识别与键鼠控制 API**，方便未来 AI Agent 自动化接入。
+**Simple VNC** — a browser VNC client with **Agent-friendly screenshot and input APIs**.
 
-参考：[noVNC](https://github.com/novnc/noVNC)。实现策略见决策文档——短期可薄包装验证，中长期精简自研 RFB 客户端。
+Inspired by [noVNC](https://github.com/novnc/noVNC), with a lean self-built RFB path and a frozen Automation contract so programs (not only humans) can operate a remote desktop.
 
-## 产品目标（已锁定）
+## Product goals
 
-1. **浏览器直用**：在网页中完成基础 VNC（连接、显示、键盘/鼠标）。
-2. **Agent API**：界面识别钩子 + 键盘/鼠标/截图等控制接口，支撑识别 → 决策 → 输入闭环。
-3. **移动端稍后**：暂不做移动缩放、触摸手势等适配，后续再补。
+1. Use it in a **web page** for basic VNC (connect, display, human keyboard/mouse).
+2. Expose APIs for **screenshot + keyboard/mouse** (and optional recognition hooks) so **AI Agents** can automate remote UIs.
+3. Mobile scaling / gestures are **out of scope** for now.
 
-## 传输立场（摘要）
+## Status (Phases 0–4)
 
-浏览器不能直接连经典 VNC 的裸 TCP。部署时二选一：
+| Phase | Status |
+|-------|--------|
+| P0 decisions (MIT, `svnc`, Raw→Tight, screenshot-first, non-viewOnly) | Done |
+| P1 Wrap Spike (`novnc-legacy` adapter + frozen types) | Done (live VNC optional) |
+| P2 Lean RFB (WS, none/VNCAuth, Raw, Tight subset, Canvas) | Done (library; live matrix optional) |
+| P3 frame/damage, drag/scroll/dblclick, inputMode, errors, clipboard docs | Done |
+| P4 RecognitionProvider + waitFor/clickTarget stubs + Agent example | Done (no built-in vision — D3) |
+| P5 productization (publish, CI matrix) | Not started |
 
-- 使用 **websockify（或兼容桥）** 做 WebSocket↔TCP——**复用上游，不自研姊妹项目**；或
-- 连接已提供 **原生 WebSocket** 的 VNC Server。
+## Quick API sketch
 
-详见 [docs/websockify-decision.md](docs/websockify-decision.md)。
+```ts
+import { SVNCClient } from 'svnc';
 
-## 文档
+const client = await SVNCClient.connect(document.getElementById('screen'), {
+  url: 'ws://127.0.0.1:6080/',
+  credentials: { password: 'secret' }, // optional VNC Auth
+  viewOnly: false, // required for click/typeText (D6)
+});
 
-| 文档 | 说明 |
-|------|------|
-| [docs/roadmap.md](docs/roadmap.md) | **整体路线图**（阶段、工作项、交付物、依赖、风险） |
-| [docs/compat-matrix.md](docs/compat-matrix.md) | 首期 Server × Auth × Encoding 兼容矩阵 |
-| [docs/novnc-analysis.md](docs/novnc-analysis.md) | noVNC 架构、模块、协议栈与自动化能力边界 |
-| [docs/design-proposal.md](docs/design-proposal.md) | 愿景、API 草案、分阶段设想（执行顺序以 roadmap 为准） |
-| [docs/build-vs-wrap-decision.md](docs/build-vs-wrap-decision.md) | Wrap / Fork / 自研客户端决策 |
-| [docs/websockify-decision.md](docs/websockify-decision.md) | WebSocket↔TCP 桥：复用 websockify vs 自研 |
-
-## 当前状态
-
-**Phase 0 已关闭**（MIT、`svnc` 包名、单包 `src/`、仅截图 API、TigerVNC + Raw→Tight、非 viewOnly）。仓库骨架已就位；核心客户端尚未落地。
-
-**下一步：** 按 [docs/roadmap.md](docs/roadmap.md) 进入 **Phase 1 Wrap Spike**（`TigerVNC + websockify` → 显示 + `screenshot` / `click` / `typeText`）。
-
-## 仓库布局（起步）
-
-```text
-svnc/
-  src/           # 单包源码（D5）
-  examples/      # Spike / Demo 占位
-  docs/          # 路线图与决策
-  package.json   # name: svnc, license: MIT
-  LICENSE
+const snap = client.screenshot(); // Agent analyzes snap.imageData / toDataURL()
+client.click(120, 80);
+await client.typeText('hello');
+client.on('frame', ({ damage }) => { /* observe updates */ });
+client.disconnect();
 ```
 
-## 参考
+Transport for classic TCP VNC: use **websockify** (SVNC does not ship a bridge product). See [docs/websockify-decision.md](./docs/websockify-decision.md).
 
-- noVNC：https://github.com/novnc/noVNC
-- RFB：https://github.com/rfbproto/rfbproto
-- websockify：https://github.com/novnc/websockify
+## Docs
 
-## 许可证
+- [Roadmap](./docs/roadmap.md)
+- [Design proposal](./docs/design-proposal.md)
+- [Compat matrix](./docs/compat-matrix.md)
+- [Spike notes](./docs/spike-notes.md)
+- [Clipboard notes](./docs/clipboard.md)
 
-**MIT**（自研代码，见 [LICENSE](LICENSE)）。
+## Develop
 
-说明：上游 **noVNC** 多为 MPL-2.0——Wrap Spike 仅作运行时依赖 / 适配层，不整段拷贝进本仓库发布物；**websockify** 为 LGPL-3.0，以**独立进程**复用，不链进本库。
+```bash
+npm install
+npm test
+npm run build
+```
+
+License: **MIT**.

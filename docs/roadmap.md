@@ -1,6 +1,6 @@
 # SVNC 整体路线图
 
-> 状态：规划文档（权威执行顺序）；**Phase 0 决策已关闭**  
+> 状态：规划文档（权威执行顺序）；**Phase 0–4 代码已落地**（直播拓扑验证仍依赖本地 VNC）  
 > 日期：2026-10-12（Asia/Shanghai）  
 > 依据：[design-proposal.md](./design-proposal.md)、[build-vs-wrap-decision.md](./build-vs-wrap-decision.md)、[websockify-decision.md](./websockify-decision.md)、[novnc-analysis.md](./novnc-analysis.md)
 
@@ -61,6 +61,8 @@ flowchart LR
 
 ## 3. Phase 1 — Wrap Spike（可丢弃）
 
+**状态：实现已合并（2026-10-12）；直播 VNC 验收可选**
+
 **目标：** 用 `@novnc/novnc` 薄适配，在真实拓扑上跑通 **看屏 + screenshot + 桌面坐标 click + typeText**，并 **冻结 Automation TypeScript 接口**（实现可换）。
 
 | 工作项 | 交付物 | 依赖 |
@@ -89,6 +91,8 @@ flowchart LR
 
 ## 4. Phase 2 — 精简自研 RFB 骨架
 
+**状态：实现已合并（2026-10-12）；默认 `SVNCClient`；Wrap deprecated**
+
 **目标：** 替换 Wrap 成为主实现路径；公开 API 形状与 Phase 1 契约对齐；协议面 **裁剪**。
 
 | 工作项 | 交付物 | 依赖 |
@@ -116,6 +120,8 @@ flowchart LR
 
 ## 5. Phase 3 — 可观测性与稳定输入
 
+**状态：实现已合并（2026-10-12）**
+
 **目标：** Agent 闭环所需的「何时再看屏」与完整指针语义；人机双模。
 
 | 工作项 | 交付物 |
@@ -134,6 +140,8 @@ flowchart LR
 ---
 
 ## 6. Phase 4 — Recognition 插件（可选；首期不做）
+
+**状态：接口/stubs/Agent 示例已合并；无内置视觉（D3）**
 
 **目标：** 可插拔界面识别，打通 `waitFor` / `clickTarget`。
 
@@ -266,4 +274,4 @@ Automation types（Phase 1 冻结） ──► Phase 2/3/4 实现不得无故改
 | [novnc-analysis.md](./novnc-analysis.md) | 上游能力边界 |
 | [compat-matrix.md](./compat-matrix.md) | 首期 Server × Auth × Encoding |
 
-**下一步立刻做：** Phase 1 Wrap Spike 开工（见 §12 第 2–3 步）。
+**下一步立刻做：** Phase 5 产品化，或在本地 TigerVNC+websockify 上验收 P1–P3 Demo。
