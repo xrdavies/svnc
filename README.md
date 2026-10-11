@@ -1,27 +1,45 @@
 # SVNC — Simple VNC
 
-SVNC（Simple VNC）是一个面向前端网页的 VNC 客户端库与应用，目标是在保留经典远程桌面能力的同时，提供**可编程的界面识别与输入控制接口**，便于直接操作远端被控软件。
+SVNC（Simple VNC）是一个面向**浏览器网页**的 VNC 客户端库与轻量应用：在提供基础远程桌面能力的同时，暴露**可编程的界面识别与键鼠控制 API**，方便未来 AI Agent 自动化接入。
 
-本项目以 [noVNC](https://github.com/novnc/noVNC) 为重要参考：协议栈、WebSocket 传输、显示与输入模型等均从 noVNC 的成熟实现出发，再针对自动化 / Agent 场景做能力扩展与 API 设计。
+参考：[noVNC](https://github.com/novnc/noVNC)。实现策略见决策文档——短期可薄包装验证，中长期精简自研 RFB 客户端。
+
+## 产品目标（已锁定）
+
+1. **浏览器直用**：在网页中完成基础 VNC（连接、显示、键盘/鼠标）。
+2. **Agent API**：界面识别钩子 + 键盘/鼠标/截图等控制接口，支撑识别 → 决策 → 输入闭环。
+3. **移动端稍后**：暂不做移动缩放、触摸手势等适配，后续再补。
+
+## 传输立场（摘要）
+
+浏览器不能直接连经典 VNC 的裸 TCP。部署时二选一：
+
+- 使用 **websockify（或兼容桥）** 做 WebSocket↔TCP——**复用上游，不自研姊妹项目**；或
+- 连接已提供 **原生 WebSocket** 的 VNC Server。
+
+详见 [docs/websockify-decision.md](docs/websockify-decision.md)。
 
 ## 文档
 
 | 文档 | 说明 |
 |------|------|
-| [docs/novnc-analysis.md](docs/novnc-analysis.md) | noVNC 架构、模块、协议栈与功能盘点（含对自动化的能力边界） |
-| [docs/design-proposal.md](docs/design-proposal.md) | SVNC 愿景、与 noVNC 的差异、可编程 API 方案与分阶段计划 |
-| [docs/build-vs-wrap-decision.md](docs/build-vs-wrap-decision.md) | 对照 noVNC 维护节奏与历史债：Wrap / Fork / 自研决策（**推荐精简自研为主，短期 Wrap Spike**） |
+| [docs/novnc-analysis.md](docs/novnc-analysis.md) | noVNC 架构、模块、协议栈与自动化能力边界 |
+| [docs/design-proposal.md](docs/design-proposal.md) | 愿景、API 草案、分阶段计划（已对齐目标 1–3） |
+| [docs/build-vs-wrap-decision.md](docs/build-vs-wrap-decision.md) | Wrap / Fork / 自研客户端决策 |
+| [docs/websockify-decision.md](docs/websockify-decision.md) | WebSocket↔TCP 桥：复用 websockify vs 自研 |
 
 ## 当前状态
 
-仓库处于**思路与方案整理**阶段：已完成 noVNC 分析、SVNC 设计提案，以及 [Wrap vs 自研决策](docs/build-vs-wrap-decision.md)。**实现策略：短期薄包装 noVNC 做自动化 Spike，中长期以 noVNC 为蓝本精简自研 RFB 客户端（不默认整库 Fork）。** 尚未落地核心代码。
+方案整理阶段：noVNC 分析、设计提案、客户端自研决策、**websockify 复用决策**已就绪。核心代码尚未落地。
+
+**下一步建议：** Phase 1 Spike——`websockify + 本地 VNC` 拓扑下，浏览器基础显示 + `screenshot` / `click` / `typeText` API。
 
 ## 参考
 
 - noVNC：https://github.com/novnc/noVNC
-- RFB 协议：https://github.com/rfbproto/rfbproto
-- websockify（WebSocket ↔ TCP 代理）：https://github.com/novnc/websockify
+- RFB：https://github.com/rfbproto/rfbproto
+- websockify：https://github.com/novnc/websockify
 
 ## 许可证
 
-待定（实现阶段确定；参考 noVNC 主要为 MPL-2.0）。
+待定（实现阶段确定；客户端参考 noVNC 多为 MPL-2.0；websockify 为 LGPL-3.0，建议以独立进程复用）。

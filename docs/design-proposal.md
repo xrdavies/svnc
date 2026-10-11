@@ -1,7 +1,7 @@
 # SVNC 设计提案：可编程远程操控
 
 > 状态：思路与方案整理（无实现代码）  
-> 依据：[novnc-analysis.md](./novnc-analysis.md) 中对 noVNC 1.7.0 树的分析，以及「Simple VNC 应能直接操作远端被控软件」的产品意图。
+> 依据：[novnc-analysis.md](./novnc-analysis.md)、[build-vs-wrap-decision.md](./build-vs-wrap-decision.md)、[websockify-decision.md](./websockify-decision.md)；产品目标见 §2.0。
 
 ## 1. 问题陈述
 
@@ -18,12 +18,18 @@ noVNC 已提供读屏（`getImageData` / `toDataURL` / `toBlob`）与 `sendKey`�
 
 ## 2. 目标与非目标
 
-### 2.1 目标
+### 2.0 产品目标（权威，已锁定）
+
+1. **浏览器网页内**直接使用，满足基础 VNC 功能（连接、显示、人工键鼠）。
+2. 提供 **API**：界面识别（可插拔）+ 键盘/鼠标控制，方便未来 **AI Agent** 自动化接入。
+3. **暂不考虑**移动端缩放、触摸手势等；后续再另行补充。
+
+### 2.1 工程目标（落实上述产品目标）
 
 | 目标 | 说明 |
 |------|------|
-| G1 精简可嵌入 | 前端库优先；可选轻量 Demo 应用，不强制完整控制条 |
-| G2 兼容 RFB 生态 | 经 WebSocket（或等价通道）连接现有 VNC Server；可继续使用 websockify 类代理 |
+| G1 精简可嵌入 | 前端库优先；可选轻量 Demo（对标 `vnc_lite` 级），不强制完整控制条 |
+| G2 兼容 RFB 生态 | 经 **WebSocket**（或等价通道）连接现有 VNC Server；经典 TCP VNC 通过 **复用 websockify / 兼容桥或原生 WS Server**（见 [websockify-decision.md](./websockify-decision.md)） |
 | G3 程序化输入 | 公开、稳定的桌面坐标指针与键盘/文本 API |
 | G4 可观测画面 | 帧快照 +（可选）帧/脏区更新事件，便于识别管线 |
 | G5 识别可插拔 | 库提供钩子与数据面；具体 OCR/CV/LLM 作为插件或外部服务 |
@@ -32,7 +38,9 @@ noVNC 已提供读屏（`getImageData` / `toDataURL` / `toBlob`）与 `sendKey`�
 ### 2.2 非目标（首期）
 
 - 不重新发明完整 RFB 服务端
-- 不首期做成「远端无障碍树 / UI Automation 控件树」协议（那是另一条技术线；可后续探索旁路通道）
+- **不自研生产级 websockify 姊妹项目**（桥为可选基建，复用上游；见 websockify-decision）
+- 不做移动端缩放 / 手势适配（产品目标 3）
+- 不首期做成「远端无障碍树 / UI Automation 控件树」协议（可后续探索旁路通道）
 - 不绑定单一视觉模型供应商
 - 不要求首期支持无头 Node 全功能（可列为后续；浏览器 Canvas 为默认运行时）
 
@@ -99,6 +107,19 @@ flowchart TB
 - **InputController**：键盘 / 指针 / 滚轮 / 剪贴板的程序化入口（坐标默认使用**远端桌面坐标**）。
 - **Automation**：面向脚本的门面（`click`、`type`、`waitFor`、`screenshot` 等），内部组合 Session + Recognition。
 - **Recognition**：可选；输入图像，输出候选目标（框、置信度、文本、标签）。
+
+
+## 4.2 传输与部署（websockify）
+
+客户端只消费 **WebSocket URL 上的 RFB 字节流**。部署侧：
+
+| 拓扑 | 何时用 |
+|------|--------|
+| `VNC(TCP) + websockify` | TigerVNC / x11vnc 等经典 Server（**默认 Demo 拓扑**） |
+| 原生 WebSocket VNC Server | 环境已提供时优先，省掉桥 |
+| 仓库内超薄桥示例 | 可选本地便利；非产品主交付 |
+
+**决策：复用 websockify（或 drop-in），不把「再做一个 websockify」纳入 SVNC 核心。** 细节与证据：[websockify-decision.md](./websockify-decision.md)。
 
 ## 5. API 草案（TypeScript 风格，示意）
 
@@ -255,7 +276,9 @@ sequenceDiagram
 
 - [x] noVNC 架构与功能分析
 - [x] SVNC 愿景与 API 草案
+- [x] 产品目标锁定：浏览器基础 VNC + Agent API；移动端暂缓
 - [x] 实现策略决策：A Spike → C 自研为主（见 [build-vs-wrap-decision.md](./build-vs-wrap-decision.md)）
+- [x] 传输决策：复用 websockify / 可选原生 WS；不自研姊妹桥（见 [websockify-decision.md](./websockify-decision.md)）
 - [ ] 与仓库所有者确认：许可证、首期识别 Provider 优先级、首期 Server/Encoding 矩阵
 
 ### Phase 1 — 最小可操控客户端（MVP）
@@ -263,7 +286,7 @@ sequenceDiagram
 - 连接 + 显示（可复用/包装 noVNC `RFB`）
 - 公开：`screenshot` / `toDataURL`、`click` / `moveTo` / `typeText` / `keyPress`
 - Demo 页：按钮触发「截图下载」「按坐标点击」「输入字符串」
-- 测试：对着本地 TigerVNC / x11vnc + websockify
+- 测试：对着本地 TigerVNC / x11vnc + **上游 websockify**（不自研桥）
 
 ### Phase 2 — 可观测性与稳定输入
 
@@ -298,6 +321,7 @@ sequenceDiagram
 | Q6 | 是否提供「仅数据通道、无像素」的旁路（如 RDP 控件树、辅助功能 API）？ | 超出经典 VNC，可作为实验分支 |
 | Q7 | 许可证：自研 MIT/Apache vs 衍生 MPL | 法律评审 |
 | Q8 | 与现有项目名 / npm 名 `svnc` 是否冲突 | 发布前检查 |
+| Q9 | 是否自研 WebSocket↔TCP 桥？ | **已决策：否**；复用 websockify / 原生 WS / 可选薄 Demo 桥 |
 
 ## 9. 建议的仓库布局（实现阶段）
 
@@ -308,12 +332,14 @@ svnc/
     novnc-analysis.md
     design-proposal.md
     build-vs-wrap-decision.md
+    websockify-decision.md
   packages/   # 或 src/
-    client/   # 连接与 RFB
+    client/   # 连接与 RFB（WebSocket 传输）
     automation/
     recognition-providers/
   examples/
-    lite-demo/
+    lite-demo/          # 浏览器基础 VNC + API 按钮
+    ws-tcp-bridge/      # 可选超薄桥（非必须）
   tests/
 ```
 
@@ -321,6 +347,9 @@ svnc/
 
 ## 10. 结论
 
+- **产品目标已锁定：** 浏览器基础 VNC；Agent 向识别 + 键鼠 API；移动端暂缓。
 - noVNC 提供了坚实的 **RFB-over-WebSocket 显示与人工输入** 基础，并已有 **读屏 + sendKey** 可编程雏形；但上游发布约一年一版、公开 API 不对齐自动化，不宜作为长期唯一实现依赖。
 - SVNC 的差异化在于把 **指针注入、帧事件、自动化门面、可插拔界面识别** 做成稳定产品 API，使「直接操作远端被控软件」成为一等场景。
-- **实现策略：** 见 [build-vs-wrap-decision.md](./build-vs-wrap-decision.md)——短期 Wrap Spike，中长期精简自研；下一步确认 Q2–Q3 与兼容性矩阵后启动 Phase 1。
+- **客户端策略：** 见 [build-vs-wrap-decision.md](./build-vs-wrap-decision.md)——短期 Wrap Spike，中长期精简自研。
+- **传输策略：** 见 [websockify-decision.md](./websockify-decision.md)——**复用 websockify / 原生 WS**；不自研生产级姊妹桥。
+- **下一步：** Phase 1 Spike（websockify + 本地 VNC → 显示 + `screenshot` / `click` / `typeText`），并冻结 Automation 类型。

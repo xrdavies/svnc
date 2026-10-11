@@ -6,7 +6,8 @@
 
 ## 1. 结论（先看）
 
-**主路径：以 noVNC 为蓝本的精简自研 RFB 客户端（路径 C），短期允许「薄包装」做产品验证（路径 A），不把长期 Fork（路径 B）当作默认策略。**
+**主路径：以 noVNC 为蓝本的精简自研 RFB 客户端（路径 C），短期允许「薄包装」做产品验证（路径 A），不把长期 Fork（路径 B）当作默认策略。**  
+（此处「自研」指 **浏览器侧 RFB/Automation 库**；**WebSocket↔TCP 桥复用 websockify**，见 [websockify-decision.md](./websockify-decision.md)。）
 
 理由简述：上游仍有维护，但发布节奏约一年一版、日常合并偏慢，且公开 API **刻意面向人工浏览器操控**——没有稳定的程序化指针与帧更新事件。SVNC 的核心差异（界面识别 + click/type 闭环）与上游产品目标不对齐，长期挂在私有 `_sendMouse` 或维护分流 Fork 的成本，高于「借鉴协议与解码思路、自建干净 Automation API」的可控工程量。完整复刻 noVNC 全部认证/编码/H.264/移动手势则不划算；自研应 **裁剪协议面**，先打通自动化主路径。
 
@@ -212,12 +213,12 @@ Spike (A, 可丢弃代码)
 
 ## 7. 建议的下一步（若采纳本推荐）
 
-1. **Spike（Wrap）**：最小 Demo——连接、截图、桌面坐标点击、`typeText`（基于 `sendKey`）、可选 OCR 插件接口空壳。适配层隔离私有调用。  
-2. **冻结 Automation API 草案**为 TypeScript 类型（可先 `interface` only）。  
+1. **Spike（Wrap）**：最小 Demo——连接、截图、桌面坐标点击、`typeText`（基于 `sendKey`）、可选 OCR 插件接口空壳。适配层隔离私有调用。拓扑用 **上游 websockify + 本地 VNC**（桥不自研，见 [websockify-decision.md](./websockify-decision.md)）。  
+2. **冻结 Automation API 草案**为 TypeScript 类型（可先 `interface` only）。对齐产品目标：浏览器基础 VNC + Agent API；不做移动适配。  
 3. **启动精简 RFB 骨架**：Websock 缓冲、ProtocolVersion、Security none/VNCAuth、ServerInit、FramebufferUpdate(Raw)、PointerEvent/KeyEvent、Canvas Display、`frame` 事件。  
-4. **兼容性矩阵文档**：列出首期支持的 Server × Encoding × Auth。  
-5. **许可决策**：自研文件 SPDX；禁止无记录地从 noVNC 复制。  
-6. **不**把完整 `app/ui.js` 控制条纳入范围。
+4. **兼容性矩阵文档**：Server ×（需桥?）× Encoding × Auth。  
+5. **许可决策**：自研文件 SPDX；禁止无记录地从 noVNC 复制；websockify 以独立进程复用（LGPL-3.0）。  
+6. **不**把完整 `app/ui.js` 控制条、移动手势、自研 websockify 纳入范围。
 
 ---
 
@@ -229,4 +230,4 @@ Spike (A, 可丢弃代码)
 - RFB：https://github.com/rfbproto/rfbproto  
 - websockify：https://github.com/novnc/websockify  
 - Kasm fork 说明：https://github.com/kasmtech/noVNC  
-- 本仓库：[novnc-analysis.md](./novnc-analysis.md)、[design-proposal.md](./design-proposal.md)
+- 本仓库：[novnc-analysis.md](./novnc-analysis.md)、[design-proposal.md](./design-proposal.md)、[websockify-decision.md](./websockify-decision.md)
