@@ -41,6 +41,7 @@ flowchart LR
 | P0 开放决策 D1–D6 关闭 | 本文件 §11；[compat-matrix.md](./compat-matrix.md) |
 | 仓库骨架（`src/` / `examples/` / MIT） | `package.json`、`LICENSE`、`.gitignore` |
 | 外围 TLS 策略（D7） | [peripheral-security.md](./peripheral-security.md)；本文件 §11 |
+| 用户/开发文档补齐 | [docs/README.md](./README.md)、[quick-start](./quick-start.md)、[automation-api](./automation-api.md)、[architecture](./architecture.md) |
 
 ---
 

@@ -1,7 +1,7 @@
 # SVNC 设计提案：可编程远程操控
 
-> 状态：思路与方案整理（无实现代码）  
-> 依据：[novnc-analysis.md](./novnc-analysis.md)、[build-vs-wrap-decision.md](./build-vs-wrap-decision.md)、[websockify-decision.md](./websockify-decision.md)；产品目标见 §2.0。**执行顺序与里程碑以 [roadmap.md](./roadmap.md) 为准。**
+> 状态：设计背景文档（**实现已落地**于 `src/` / `SVNCClient`；以代码与 [automation-api.md](./automation-api.md) 为准）  
+> 依据：[novnc-analysis.md](./novnc-analysis.md)、[build-vs-wrap-decision.md](./build-vs-wrap-decision.md)、[websockify-decision.md](./websockify-decision.md)；产品目标见 §2.0。**执行顺序与里程碑以 [roadmap.md](./roadmap.md) 为准。** 架构入口：[architecture.md](./architecture.md)。
 
 ## 1. 问题陈述
 

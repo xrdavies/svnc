@@ -33,6 +33,8 @@ Requires a browser (or JSDOM-like) environment with **WebSocket** + **Canvas**, 
 
 ## Quick API sketch
 
+Full reference: [Automation API](./docs/automation-api.md). Step-by-step: [Quick start](./docs/quick-start.md).
+
 ```ts
 import { SVNCClient } from 'svnc';
 
@@ -65,14 +67,25 @@ Production encryption: prefer **WSS reverse proxy / VPN / SSH** — not RFB VeNC
 
 ## Docs
 
-- [Roadmap](./docs/roadmap.md) (incl. closed decisions D1–D7)
-- [Design proposal](./docs/design-proposal.md)
-- [Compat matrix](./docs/compat-matrix.md)
-- [Peripheral security (WSS / VPN / SSH vs VeNCrypt)](./docs/peripheral-security.md)
-- [Security / Automation threat model](./docs/security.md)
-- [Lean RFB gaps](./docs/lean-rfb-gaps.md)
-- [npm 手动发布](./docs/npm-publish.md)
-- [Changelog](./CHANGELOG.md)
+Index: **[docs/README.md](./docs/README.md)**
+
+| Doc | Audience |
+|-----|----------|
+| [Quick start](./docs/quick-start.md) | Users — install, local e2e, minimal connect |
+| [Automation API](./docs/automation-api.md) | Users / Agents — `SVNCClient`, events, errors |
+| [Architecture](./docs/architecture.md) | Devs — module map ↔ `src/` |
+| [Local e2e](./docs/e2e-local.md) | Devs — Xvfb + x11vnc + websockify |
+| [Compat matrix](./docs/compat-matrix.md) | Devs — Server / Auth / Encoding |
+| [Roadmap](./docs/roadmap.md) | Planning — Phases + decisions D1–D7 |
+| [Design proposal](./docs/design-proposal.md) | Planning — vision / early draft |
+| [Peripheral security](./docs/peripheral-security.md) | Deploy — WSS / VPN / SSH (**D7**) |
+| [Security](./docs/security.md) | Embedders — Automation threat model |
+| [Clipboard](./docs/clipboard.md) | Users — `clipboardWrite` / `viaClipboard` |
+| [Lean RFB gaps](./docs/lean-rfb-gaps.md) | Devs — done vs deferred |
+| [websockify decision](./docs/websockify-decision.md) | Deploy — reuse bridge |
+| [npm 手动发布](./docs/npm-publish.md) | Maintainers |
+| [CI](./docs/ci.md) | Maintainers |
+| [Changelog](./CHANGELOG.md) | Everyone |
 
 ## Develop
 

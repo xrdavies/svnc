@@ -17,7 +17,7 @@ First public release of **svnc** (Simple VNC): lean browser RFB client with Agen
 - `SVNCClient` Automation API: screenshot / toDataURL, move/click/drag/scroll/typeText, frame+damage events, inputMode
 - Recognition hooks: `RecognitionProvider` interface + stubs; Agent brings its own vision (D3)
 - Examples: full [demo](./examples/demo/), lite page, Agent screenshot / GitHub nav, optional non-production WS↔TCP bridge
-- Docs: roadmap (P0–P5), design, compat matrix, peripheral security (D7), threat model, e2e-local
+- Docs: roadmap (P0–P5), design, compat matrix, peripheral security (D7), threat model, e2e-local; user/dev guides (quick start, Automation API, architecture index)
 - CI recipe: typecheck, unit tests, build ([docs/ci.md](./docs/ci.md); enable Actions workflow when the pushing token has `workflow` scope)
 - License: MIT
 
