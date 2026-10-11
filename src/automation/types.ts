@@ -58,6 +58,16 @@ export type ConnectOptions = {
   viewOnly?: boolean;
   /** Preferred pixel depth request; client may negotiate. Default 24-bit true-colour. */
   preferredEncodings?: Array<'raw' | 'tight' | 'copyrect'>;
+  /**
+   * Who may drive input: `human` / `mixed` forward canvas DOM events;
+   * `script` only allows Automation APIs. Default `mixed`.
+   */
+  inputMode?: InputMode;
+  /**
+   * When false, skip attaching canvas mouse/keyboard listeners even if a target
+   * element is provided. Default true.
+   */
+  enableHumanInput?: boolean;
 };
 
 export type DesktopInfo = {

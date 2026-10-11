@@ -99,7 +99,7 @@
         display: inline-block;
         max-width: 100%;
       }
-      #screen canvas { display: block; }
+      #screen canvas { display: block; cursor: default; outline: none; }
       #status {
         font-size: 0.85rem;
         padding: 0.4rem 0.55rem;
@@ -136,6 +136,8 @@
       <h1>SVNC Local Demo</h1>
       <p>
         Lean RFB client · coordinates = remote desktop pixels · non-viewOnly automation.
+        <strong>Click the remote canvas</strong> to focus; mouse / wheel / keyboard are forwarded when
+        <code>inputMode</code> is <code>human</code> or <code>mixed</code>.
         Default stack: Xvfb + x11vnc + websockify (see <code>docs/e2e-local.md</code>).
       </p>
     </header>
@@ -156,6 +158,19 @@
           </div>
           <div class="row">
             <label class="inline"><input id="viewOnly" type="checkbox" /> viewOnly</label>
+            <label>inputMode
+              <select id="inputMode">
+                <option value="mixed" selected>mixed (API + human)</option>
+                <option value="human">human only (DOM)</option>
+                <option value="script">script only (API)</option>
+              </select>
+            </label>
+          </div>
+          <p class="hint">
+            Human mouse/keyboard work on the canvas when mode is <code>mixed</code> or <code>human</code>
+            and viewOnly is off. Use <code>script</code> to lock out DOM input (Agent-only).
+          </p>
+          <div class="row">
             <button id="connect" class="primary">Connect</button>
             <button id="disconnect" disabled>Disconnect</button>
           </div>
@@ -211,6 +226,10 @@
 
       <section class="panel">
         <h2>Remote desktop</h2>
+        <p class="hint">
+          Click canvas to focus · drag / click / wheel · type when focused.
+          Hard-refresh (Ctrl+Shift+R) after rebuilds so the browser picks up new <code>dist/</code>.
+        </p>
         <div id="screen"></div>
       </section>
     </main>

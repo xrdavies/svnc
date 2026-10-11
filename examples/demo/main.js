@@ -63,12 +63,15 @@ $('connect').onclick = async () => {
     $('frameCount').value = '0';
     $('damageCount').value = '0';
     setStatus('connecting…');
+    const inputMode = /** @type {'human'|'script'|'mixed'} */ ($('inputMode').value);
     client = await SVNCClient.connect(screen, {
       url,
       credentials: password ? { password } : undefined,
       viewOnly,
       shared: true,
       preferredEncodings: ['raw', 'tight', 'copyrect'],
+      inputMode,
+      enableHumanInput: true,
     });
     client.on('frame', (payload) => {
       frameCount += 1;
@@ -90,8 +93,9 @@ $('connect').onclick = async () => {
     client.on('error', (err) => log(`error: ${err}`));
     client.on('clipboard', (text) => log(`clipboard ← ${JSON.stringify(text)}`));
     const d = client.desktop;
-    log(`connected ${d.width}x${d.height} name=${JSON.stringify(d.name)} viewOnly=${client.viewOnly}`);
-    setStatus(`connected ${d.width}×${d.height}`, 'ok');
+    log(`connected ${d.width}x${d.height} name=${JSON.stringify(d.name)} viewOnly=${client.viewOnly} inputMode=${client.inputMode}`);
+    log('human input: click the canvas to focus, then mouse/wheel/keyboard are forwarded');
+    setStatus(`connected ${d.width}×${d.height} · ${client.inputMode}`, 'ok');
     setConnected(true);
     // expose for headless verify scripts
     window.__svncClient = client;
@@ -175,3 +179,11 @@ $('shot').onclick = () => {
 
 log('demo ready — connect to local websockify');
 window.__svncReady = false;
+
+$('inputMode').onchange = () => {
+  if (!client) return;
+  const mode = /** @type {'human'|'script'|'mixed'} */ ($('inputMode').value);
+  client.inputMode = mode;
+  log(`inputMode → ${mode}`);
+  setStatus(`connected ${client.desktop.width}×${client.desktop.height} · ${mode}`, 'ok');
+};

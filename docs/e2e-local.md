@@ -37,6 +37,7 @@ Runtime PIDs/logs live under `.local-e2e/` (gitignored).
 - `drag` / `scroll`
 - `typeText` / `keyPress(Enter)`
 - `frame` / damage counters
+- Human canvas input (`inputMode` mixed/human): mouse, wheel, keyboard after focus
 
 ## Automated verification
 

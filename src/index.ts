@@ -38,3 +38,7 @@ export { toKeysym, textToKeysyms } from './utils/keysym.js';
 /** @deprecated Phase 1 Wrap — prefer SVNCClient */
 export { NovncLegacyAdapter, createNovncLegacyAdapter } from './adapters/novnc-legacy.js';
 export type { NovncLegacyOptions } from './adapters/novnc-legacy.js';
+
+export { attachHumanInput, eventToDesktopPoint } from './input/human-input.js';
+export type { HumanInputSession } from './input/human-input.js';
+

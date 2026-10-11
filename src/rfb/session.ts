@@ -21,6 +21,7 @@ import type {
 } from '../automation/types.js';
 import { CanvasDisplay } from '../display/canvas.js';
 import { EventBus } from '../utils/events.js';
+import { attachHumanInput } from '../input/human-input.js';
 import { textToKeysyms, toKeysym } from '../utils/keysym.js';
 import { Encoding, PointerButtonMask, RFB_VERSION, SecurityType, ClientMessage, ServerMessage } from './constants.js';
 import { vncEncryptChallenge } from './d3des.js';
@@ -60,9 +61,11 @@ export class RfbSession implements AutomationSurface {
   private running = false;
   private inflate: InflateState | null = null;
   inputMode: InputMode = 'mixed';
+  private detachHuman: (() => void) | null = null;
 
   constructor(private readonly opts: RfbSessionOptions) {
     this._viewOnly = opts.viewOnly === true;
+    this.inputMode = opts.inputMode ?? 'mixed';
     this.display = opts.display ?? new CanvasDisplay(opts.target ?? null);
   }
 
@@ -101,11 +104,22 @@ export class RfbSession implements AutomationSurface {
     await this.handshake();
     this._connected = true;
     this.running = true;
+    this.attachHumanInputIfNeeded();
     this.bus.emit('connect');
     void this.readLoop().catch((err) => {
       this.bus.emit('error', err);
       this.teardown(err);
     });
+  }
+
+  private attachHumanInputIfNeeded(): void {
+    this.detachHuman?.();
+    this.detachHuman = null;
+    if (this.opts.enableHumanInput === false) return;
+    if (typeof document === 'undefined') return;
+    const canvas = this.display.canvas;
+    if (!canvas) return;
+    this.detachHuman = attachHumanInput(canvas, this);
   }
 
   disconnect(): void {
@@ -116,6 +130,8 @@ export class RfbSession implements AutomationSurface {
     const was = this._connected;
     this.running = false;
     this._connected = false;
+    this.detachHuman?.();
+    this.detachHuman = null;
     this.transport.close();
     if (was) this.bus.emit('disconnect', err);
   }
