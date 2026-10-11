@@ -71,6 +71,7 @@ Production encryption: prefer **WSS reverse proxy / VPN / SSH** — not RFB VeNC
 - [Peripheral security (WSS / VPN / SSH vs VeNCrypt)](./docs/peripheral-security.md)
 - [Security / Automation threat model](./docs/security.md)
 - [Lean RFB gaps](./docs/lean-rfb-gaps.md)
+- [npm 手动发布](./docs/npm-publish.md)
 - [Changelog](./CHANGELOG.md)
 
 ## Develop
