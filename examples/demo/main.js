@@ -69,7 +69,7 @@ $('connect').onclick = async () => {
       credentials: password ? { password } : undefined,
       viewOnly,
       shared: true,
-      preferredEncodings: ['raw', 'tight', 'copyrect'],
+      preferredEncodings: ['raw', 'tight', 'zrle', 'hextile', 'rre', 'copyrect'],
       inputMode,
       enableHumanInput: true,
     });

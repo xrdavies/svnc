@@ -57,7 +57,7 @@ export type ConnectOptions = {
    */
   viewOnly?: boolean;
   /** Preferred pixel depth request; client may negotiate. Default 24-bit true-colour. */
-  preferredEncodings?: Array<'raw' | 'tight' | 'copyrect'>;
+  preferredEncodings?: Array<'raw' | 'tight' | 'zrle' | 'hextile' | 'rre' | 'copyrect'>;
   /**
    * Who may drive input: `human` / `mixed` forward canvas DOM events;
    * `script` only allows Automation APIs. Default `mixed`.

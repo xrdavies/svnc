@@ -1,5 +1,6 @@
 /**
- * Lean RFB session: handshake (none + VNC Auth), Raw (+ Tight basic), input, framebuffer.
+ * Lean RFB session: handshake (None + VNC Auth), encodings (Raw/CopyRect/RRE/Hextile/ZRLE/Tight+JPEG),
+ * soft cursor, ExtendedDesktopSize, input, framebuffer.
  */
 
 import {
@@ -25,6 +26,13 @@ import { attachHumanInput } from '../input/human-input.js';
 import { textToKeysyms, toKeysym } from '../utils/keysym.js';
 import { Encoding, PointerButtonMask, RFB_VERSION, SecurityType, ClientMessage, ServerMessage } from './constants.js';
 import { vncEncryptChallenge } from './d3des.js';
+import { decodeCursorPseudo } from './encodings/cursor.js';
+import { parseExtendedDesktopSize } from './encodings/extended-desktop-size.js';
+import { decodeHextile } from './encodings/hextile.js';
+import { decodeRre } from './encodings/rre.js';
+import { decodeTightRect } from './encodings/tight.js';
+import { decodeZrleTiles } from './encodings/zrle.js';
+import { TightInflatePool, ZrleInflater } from './inflate.js';
 import { decodePixelFormat, encodePixelFormat, PREFERRED_PIXEL_FORMAT, type PixelFormat, pixelToRgb } from './pixel-format.js';
 import { MessageWriter, RfbTransport, readI32, readU16, readU32 } from './transport.js';
 
@@ -59,7 +67,9 @@ export class RfbSession implements AutomationSurface {
   private pointerX = 0;
   private pointerY = 0;
   private running = false;
-  private inflate: InflateState | null = null;
+  private tightInflate = new TightInflatePool();
+  private zrleInflate = new ZrleInflater();
+  private screens: Array<{ id: number; x: number; y: number; width: number; height: number; flags: number }> = [];
   inputMode: InputMode = 'mixed';
   private detachHuman: (() => void) | null = null;
 
@@ -71,6 +81,11 @@ export class RfbSession implements AutomationSurface {
 
   get desktop(): DesktopInfo {
     return { ...this._desktop };
+  }
+
+  /** Multi-monitor layout from ExtendedDesktopSize (empty if unused). */
+  get screenLayout(): Array<{ id: number; x: number; y: number; width: number; height: number; flags: number }> {
+    return this.screens.map((s) => ({ ...s }));
   }
 
   get connected(): boolean {
@@ -207,25 +222,32 @@ export class RfbSession implements AutomationSurface {
   }
 
   private chooseEncodings(): number[] {
-    const preferred = this.opts.preferredEncodings ?? ['raw', 'tight', 'copyrect'];
+    const preferred =
+      this.opts.preferredEncodings ??
+      (['tight', 'zrle', 'hextile', 'rre', 'copyrect', 'raw'] as const);
+    const map: Record<string, number> = {
+      tight: Encoding.Tight,
+      zrle: Encoding.ZRLE,
+      hextile: Encoding.Hextile,
+      rre: Encoding.RRE,
+      copyrect: Encoding.CopyRect,
+      raw: Encoding.Raw,
+    };
     const list: number[] = [];
-    // Raw first when listed — D2 / reliability over bandwidth for Agent screenshots
-    const ordered = [...preferred];
-    if (ordered.includes('raw')) {
-      ordered.splice(ordered.indexOf('raw'), 1);
-      ordered.unshift('raw');
+    for (const p of preferred) {
+      const enc = map[p];
+      if (enc !== undefined && !list.includes(enc)) list.push(enc);
     }
-    for (const p of ordered) {
-      if (p === 'tight') list.push(Encoding.Tight);
-      if (p === 'raw') list.push(Encoding.Raw);
-      if (p === 'copyrect') list.push(Encoding.CopyRect);
+    for (const fallback of [Encoding.CopyRect, Encoding.Raw]) {
+      if (!list.includes(fallback)) list.push(fallback);
     }
-    if (!list.includes(Encoding.CopyRect)) list.push(Encoding.CopyRect);
-    if (!list.includes(Encoding.Raw)) list.push(Encoding.Raw);
+    // Pseudo-encodings
     list.push(Encoding.DesktopSize);
+    list.push(Encoding.ExtendedDesktopSize);
     list.push(Encoding.LastRect);
-    // Discourage Tight JPEG (lean path does not decode JPEG yet)
-    list.push(Encoding.QualityLevel0); // -32 → quality 0
+    list.push(Encoding.Cursor);
+    // JPEG quality mid-high now that we decode Tight JPEG
+    list.push(Encoding.QualityLevel0 + 7); // quality 7 → -25
     list.push(Encoding.CompressionLevel0 - 2); // level 2
     return list;
   }
@@ -309,6 +331,28 @@ export class RfbSession implements AutomationSurface {
       if (encoding === Encoding.DesktopSize) {
         this._desktop = { ...this._desktop, width: w, height: h };
         this.display.resize(w, h);
+        this.bus.emit('desktopsize', { width: w, height: h });
+        continue;
+      }
+      if (encoding === Encoding.ExtendedDesktopSize) {
+        // Payload: U8 nScreens + 3 bytes padding + n*16 SCREEN (rfbproto / noVNC)
+        const nScreensBuf = await this.transport.read(1);
+        const nScreens = nScreensBuf[0]!;
+        await this.transport.read(3); // padding
+        const rest = await this.transport.read(nScreens * 16);
+        const payload = new Uint8Array(4 + rest.length);
+        payload[0] = nScreens;
+        payload[1] = 0;
+        payload[2] = 0;
+        payload[3] = 0;
+        payload.set(rest, 4);
+        const eds = parseExtendedDesktopSize(w, h, x, y, payload);
+        this.screens = eds.screens;
+        if (eds.fbWidth !== this._desktop.width || eds.fbHeight !== this._desktop.height) {
+          this._desktop = { ...this._desktop, width: eds.fbWidth, height: eds.fbHeight };
+          this.display.resize(eds.fbWidth, eds.fbHeight);
+        }
+        this.bus.emit('extendeddesktopsize', eds);
         continue;
       }
       if (encoding === Encoding.LastRect) break;
@@ -317,28 +361,105 @@ export class RfbSession implements AutomationSurface {
         damage.push(await this.decodeRaw(x, y, w, h));
       } else if (encoding === Encoding.CopyRect) {
         damage.push(await this.decodeCopyRect(x, y, w, h));
+      } else if (encoding === Encoding.RRE) {
+        damage.push(await this.decodeRre(x, y, w, h));
+      } else if (encoding === Encoding.Hextile) {
+        damage.push(await this.decodeHextile(x, y, w, h));
+      } else if (encoding === Encoding.ZRLE) {
+        damage.push(await this.decodeZrle(x, y, w, h));
       } else if (encoding === Encoding.Tight) {
         damage.push(await this.decodeTight(x, y, w, h));
       } else if (encoding === Encoding.Cursor) {
-        // Not advertised by default; if a server still sends it, consume payload and ignore
-        await this.consumeCursorPseudo(w, h);
+        await this.decodeCursor(x, y, w, h);
       } else {
         throw new SvncError('UNSUPPORTED', `Unsupported encoding ${encoding}`, { encoding });
       }
     }
     this.bus.emit('frame', { damage });
-    // Keep asking for incremental updates
     if (this._connected) {
       this.sendFramebufferUpdateRequest(true, 0, 0, this._desktop.width, this._desktop.height);
     }
   }
 
-  /** Drop remote-cursor pseudo-encoding pixels + mask (no local cursor overlay yet). */
-  private async consumeCursorPseudo(w: number, h: number): Promise<void> {
+  private async decodeRre(x: number, y: number, w: number, h: number): Promise<DamageRect> {
+    const bpp = this.serverPf.bitsPerPixel / 8;
+    const nBuf = await this.transport.read(4);
+    const nSub = readU32(nBuf, 0);
+    const rest = await this.transport.read(bpp + nSub * (bpp + 8));
+    const data = new Uint8Array(4 + rest.length);
+    data.set(nBuf, 0);
+    data.set(rest, 4);
+    return decodeRre(this.display, x, y, w, h, data, this.serverPf);
+  }
+
+  private async decodeHextile(x: number, y: number, w: number, h: number): Promise<DamageRect> {
+    // Hextile length is not prefixed — parse tile-by-tile from stream into a buffer
+    // by reading until all tiles consumed. Use streaming parser:
+    return this.decodeHextileStreaming(x, y, w, h);
+  }
+
+  private async decodeHextileStreaming(x: number, y: number, w: number, h: number): Promise<DamageRect> {
+    const bpp = this.serverPf.bitsPerPixel / 8;
+    const chunks: Uint8Array[] = [];
+    const RAW = 1;
+    const BACKGROUND = 2;
+    const FOREGROUND = 4;
+    const ANY_SUBRECTS = 8;
+    const SUBRECTS_COLOURED = 16;
+
+    for (let ty = 0; ty < h; ty += 16) {
+      const th = Math.min(16, h - ty);
+      for (let tx = 0; tx < w; tx += 16) {
+        const tw = Math.min(16, w - tx);
+        const maskBuf = await this.transport.read(1);
+        chunks.push(maskBuf);
+        const mask = maskBuf[0]!;
+        if (mask & RAW) {
+          chunks.push(await this.transport.read(tw * th * bpp));
+          continue;
+        }
+        if (mask & BACKGROUND) chunks.push(await this.transport.read(bpp));
+        if (mask & FOREGROUND) chunks.push(await this.transport.read(bpp));
+        if (mask & ANY_SUBRECTS) {
+          const nBuf = await this.transport.read(1);
+          chunks.push(nBuf);
+          const n = nBuf[0]!;
+          const coloured = (mask & SUBRECTS_COLOURED) !== 0;
+          const per = coloured ? bpp + 2 : 2;
+          if (n > 0) chunks.push(await this.transport.read(n * per));
+        }
+      }
+    }
+    let total = 0;
+    for (const c of chunks) total += c.length;
+    const data = new Uint8Array(total);
+    let o = 0;
+    for (const c of chunks) {
+      data.set(c, o);
+      o += c.length;
+    }
+    return decodeHextile(this.display, x, y, w, h, data, this.serverPf);
+  }
+
+  private async decodeZrle(x: number, y: number, w: number, h: number): Promise<DamageRect> {
+    const len = readU32(await this.transport.read(4), 0);
+    const zlibData = await this.transport.read(len);
+    const raw = this.zrleInflate.inflate(zlibData);
+    return decodeZrleTiles(this.display, x, y, w, h, raw, this.serverPf);
+  }
+
+  private async decodeCursor(hotX: number, hotY: number, w: number, h: number): Promise<void> {
     const bpp = this.serverPf.bitsPerPixel / 8;
     const pixels = w * h * bpp;
     const mask = ((w + 7) >> 3) * h;
-    await this.transport.read(pixels + mask);
+    if (w === 0 || h === 0) {
+      this.display.setSoftCursor(null);
+      return;
+    }
+    const payload = await this.transport.read(pixels + mask);
+    const cursor = decodeCursorPseudo(hotX, hotY, w, h, payload, this.serverPf);
+    this.display.setSoftCursor(cursor);
+    this.bus.emit('cursor', cursor);
   }
 
   private async decodeRaw(x: number, y: number, w: number, h: number): Promise<DamageRect> {
@@ -377,148 +498,16 @@ export class RfbSession implements AutomationSurface {
    * Full Tight is large; this covers common TigerVNC solid + copy-style tight streams.
    */
   private async decodeTight(x: number, y: number, w: number, h: number): Promise<DamageRect> {
-    const compControl = (await this.transport.read(1))[0]!;
-    // Reset zlib streams as requested
-    for (let i = 0; i < 4; i++) {
-      if (compControl & (1 << i)) this.resetInflater(i);
-    }
-    const filterIdBit = compControl & 0x40;
-    // Fill compression
-    if ((compControl & 0xf0) === 0x80) {
-      const bpp = Math.min(3, this.serverPf.bitsPerPixel / 8);
-      const color = await this.transport.read(bpp === 4 ? 3 : bpp);
-      const r = color[0]!;
-      const g = color[1] ?? 0;
-      const b = color[2] ?? 0;
-      return this.display.fillRect(x, y, w, h, r, g, b);
-    }
-    // JPEG — consume payload, soft-skip, ask for a full Raw refresh (do not kill session)
-    if ((compControl & 0xf0) === 0x90) {
-      const len = await this.readCompactLength();
-      await this.transport.read(len);
-      this.bus.emit('error', new SvncError('UNSUPPORTED', 'Tight JPEG skipped; requesting Raw refresh', { x, y, w, h }));
-      // Prefer Raw on next full update
-      this.sendSetEncodings([
-        Encoding.Raw,
-        Encoding.CopyRect,
-        Encoding.Tight,
-        Encoding.DesktopSize,
-        Encoding.LastRect,
-        Encoding.QualityLevel0,
-        Encoding.CompressionLevel0 - 2,
-      ]);
-      this.sendFramebufferUpdateRequest(false, 0, 0, this._desktop.width, this._desktop.height);
-      return { x, y, width: w, height: h };
-    }
-
-    let filterId = 0;
-    let palette: Array<[number, number, number]> | null = null;
-    if (filterIdBit) {
-      filterId = (await this.transport.read(1))[0]!;
-      if (filterId === 1) {
-        // Palette filter: palette precedes zlib payload (TPIXEL = 3 bytes).
-        const paletteSize = (await this.transport.read(1))[0]! + 1;
-        palette = [];
-        for (let i = 0; i < paletteSize; i++) {
-          const c = await this.transport.read(3);
-          palette.push([c[0]!, c[1]!, c[2]!]);
-        }
-      }
-    }
-
-    // Expected uncompressed length for copy / palette index data
-    let expected = w * h * 3;
-    if (filterId === 1 && palette) {
-      expected = palette.length === 2 ? ((w + 7) >> 3) * h : w * h;
-    }
-
-    const len = await this.readCompactLength();
-    let raw = await this.transport.read(len);
-    // Tight: uncompressed when high nibble uses "no zlib" (0x0A << 4) pattern,
-    // or when declared length already equals expected size.
-    const noZlib = ((compControl >> 4) & 0x0f) === 0x0a;
-    if (!noZlib && len !== expected) {
-      const streamId = compControl & 0x03;
-      raw = await this.inflateBytes(streamId, raw);
-    }
-
-    if (filterId === 0) {
-      return this.display.blitRgb(x, y, w, h, raw, 3, 'rgb');
-    }
-    if (filterId === 1 && palette) {
-      const rgb = new Uint8Array(w * h * 3);
-      if (palette.length === 2) {
-        let src = 0;
-        for (let row = 0; row < h; row++) {
-          let bit = 0;
-          let byte = 0;
-          for (let col = 0; col < w; col++) {
-            if (bit === 0) {
-              byte = raw[src++] ?? 0;
-              bit = 8;
-            }
-            bit--;
-            const idx = (byte >> bit) & 1;
-            const [r, g, b] = palette[idx]!;
-            const di = (row * w + col) * 3;
-            rgb[di] = r;
-            rgb[di + 1] = g;
-            rgb[di + 2] = b;
-          }
-        }
-      } else {
-        for (let i = 0; i < w * h; i++) {
-          const idx = raw[i] ?? 0;
-          const [r, g, b] = palette[idx] ?? palette[0]!;
-          rgb[i * 3] = r;
-          rgb[i * 3 + 1] = g;
-          rgb[i * 3 + 2] = b;
-        }
-      }
-      return this.display.blitRgb(x, y, w, h, rgb, 3, 'rgb');
-    }
-    if (filterId === 2) {
-      if (raw.byteLength >= w * h * 3) {
-        return this.display.blitRgb(x, y, w, h, raw, 3, 'rgb');
-      }
-    }
-    throw new SvncError('UNSUPPORTED', `Tight filter ${filterId} not implemented`);
-  }
-
-  private async readCompactLength(): Promise<number> {
-    const b0 = (await this.transport.read(1))[0]!;
-    let len = b0 & 0x7f;
-    if (b0 & 0x80) {
-      const b1 = (await this.transport.read(1))[0]!;
-      len |= (b1 & 0x7f) << 7;
-      if (b1 & 0x80) {
-        const b2 = (await this.transport.read(1))[0]!;
-        len |= b2 << 14;
-      }
-    }
-    return len;
-  }
-
-  private resetInflater(id: number): void {
-    if (!this.inflate) this.inflate = { streams: new Map() };
-    this.inflate.streams.delete(id);
-  }
-
-  private async inflateBytes(_streamId: number, data: Uint8Array): Promise<Uint8Array> {
-    if (typeof DecompressionStream === 'undefined') {
-      return data;
-    }
-    if (!this.inflate) this.inflate = { streams: new Map() };
-    try {
-      const ds = new DecompressionStream('deflate-raw');
-      const copy = data.slice();
-      const blob = new Blob([copy.buffer]);
-      const stream = blob.stream().pipeThrough(ds);
-      const buf = await new Response(stream).arrayBuffer();
-      return new Uint8Array(buf);
-    } catch {
-      return data;
-    }
+    return decodeTightRect(
+      this.display,
+      x,
+      y,
+      w,
+      h,
+      (n) => this.transport.read(n),
+      this.serverPf,
+      this.tightInflate,
+    );
   }
 
   // --- AutomationSurface input ---
@@ -578,6 +567,7 @@ export class RfbSession implements AutomationSurface {
     this.ensureInside(x, y);
     this.pointerX = Math.floor(x);
     this.pointerY = Math.floor(y);
+    this.display.setCursorPosition(this.pointerX, this.pointerY);
     this.sendPointer();
   }
 
@@ -686,7 +676,3 @@ export class RfbSession implements AutomationSurface {
     this.transport.send(msg.toUint8Array());
   }
 }
-
-type InflateState = {
-  streams: Map<number, unknown>;
-};

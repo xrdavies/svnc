@@ -3,32 +3,47 @@
 > Date: 2026-10-12 (Asia/Shanghai)  
 > Default runtime is **self-built** `RfbSession` / `SVNCClient`. Wrap / `@novnc/novnc` is **not** a dependency.
 
-## Shipped (enough for Automation MVP)
+## Shipped
 
 | Area | Status |
 |------|--------|
 | RFB 3.8 handshake | None + VNC Auth |
-| Encodings | **Raw** (preferred), CopyRect, Tight (fill / copy / palette); DesktopSize, LastRect |
-| Input | Pointer (incl. wheel bits), KeyEvent, typeText, clipboard write |
+| Encodings | **Raw**, CopyRect, **RRE**, **Hextile**, **ZRLE**, **Tight** (fill / copy / palette / **gradient** / **JPEG**) |
+| Tight zlib | **Stateful** raw-deflate pool (4 streams) via `fflate` |
+| ZRLE zlib | Persistent / per-rect zlib inflate via `ZrleInflater` |
+| Cursor pseudo-encoding (−239) | **Soft cursor** overlay (FB for Agent screenshots stays clean) |
+| DesktopSize (−223) | Resize + `desktopsize` event |
+| ExtendedDesktopSize (−308) | Parse screen layout, resize FB, `extendeddesktopsize` event + `screenLayout` |
+| Input | Pointer (incl. wheel), KeyEvent, typeText, clipboard write |
 | Display | Canvas framebuffer, screenshot / toDataURL / frame+damage events |
 | Human input | Optional canvas DOM → RFB (`human` / `mixed`) |
 
-## Known gaps (backlog)
+## Closed this pass
 
-| Gap | Impact | Mitigation now | Next |
-|-----|--------|----------------|------|
-| **Tight JPEG** | Some servers send JPEG Tight rects | Soft-skip payload + re-advertise Raw + full refresh; QualityLevel0 advertised | Optional decode via `createImageBitmap` / JPEG decoder |
-| **Tight zlib stream state** | Fresh `DecompressionStream` per rect may diverge from continuous zlib streams | Prefer Raw; palette/fill paths common on x11vnc | Stateful inflate per stream id |
-| **ZRLE / Hextile / RRE** | Not decoded | Not advertised | Add only with matrix row |
-| **Cursor pseudo-encoding** | No local cursor overlay | Not advertised; if received, payload consumed | Optional soft cursor |
-| **ExtendedDesktopSize / multi-monitor** | No layout | DesktopSize only | When needed |
-| **VeNCrypt / RA2 / TLS** | Auth beyond VNC Auth | Out of scope | Matrix-driven |
-| **Continuous Tight without Raw** | Bandwidth-heavy Raw on WAN | OK for local Agent / demo | Improve Tight + JPEG |
+| Gap | Resolution |
+|-----|------------|
+| **Tight JPEG** | Decode via `jpeg-js` (Node) or `createImageBitmap` / `<img>` (browser); no soft-skip |
+| **Tight zlib stream state** | `TightInflatePool` + `RawDeflateStream` (fflate `Inflate`, 4 streams, reset bits) |
+| **ZRLE / Hextile / RRE** | Full decoders; advertised in `SetEncodings` |
+| **Cursor pseudo-encoding** | Soft cursor on canvas; Agent `screenshot`/`toDataURL` omit overlay |
+| **ExtendedDesktopSize** | Parse + resize; multi-monitor layout retained in `screenLayout` |
+| **Continuous Tight without Raw** | Default preference order starts with Tight; QualityLevel 7 advertised; JPEG + stateful zlib make Tight-only viable |
+
+## Deferred (out of SVNC scope / matrix)
+
+| Gap | Reason |
+|-----|--------|
+| **VeNCrypt / RA2 / TLS** | Auth beyond None + VNC Auth; [compat-matrix](./compat-matrix.md) keeps these ❌ until a required server topology appears |
+| **SetDesktopSize client→server** | Optional follow-on once a product story needs client-initiated layout changes; receive path for ExtendedDesktopSize is done |
+| **Mobile scaleViewport** | Post-MVP (product non-goal) |
+| **Self-built websockify** | Reuse upstream / native WS VNC ([websockify-decision](./websockify-decision.md)) |
+| **Built-in OCR / HTTP Vision** | D3: screenshot API only; Agent brings its own vision |
 
 ## Non-goals (still)
 
 - Shipping `@novnc/novnc` or Wrap as default
 - Self-built websockify product
 - Mobile scaleViewport (post-MVP)
+- Built-in recognition providers (D3)
 
 Historical Wrap adapter: [`examples/archive/novnc-legacy.ts`](../examples/archive/novnc-legacy.ts).

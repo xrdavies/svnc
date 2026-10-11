@@ -29,7 +29,8 @@ TigerVNC (display)  --TCP RFB-->  websockify  --WebSocket-->  SVNC (browser)
 |--------|----------|------|
 | 1 | Raw | Phase 1 Spike / Phase 2 骨架必过 |
 | 2 | **Tight** | Phase 2 扩展（D2 已定） |
-| — | ZRLE / H.264 / 其它 | Backlog，无用户故事不加 |
+| 3 | ZRLE / Hextile / RRE | Lean RFB 已实现并广告；矩阵「必过」仍以 Raw+Tight 为准 |
+| — | H.264 / 其它 | Backlog，无用户故事不加 |
 
 ## 3. 认证范围
 
@@ -60,7 +61,7 @@ TigerVNC (display)  --TCP RFB-->  websockify  --WebSocket-->  SVNC (browser)
 
 | Server | Auth | Encoding | Bridge | 文档 |
 |--------|------|----------|--------|------|
-| **x11vnc** + Xvfb | VNC Auth (`svnc-demo`) | Raw（客户端优先）；Tight 已实现含 palette | websockify `:6080`→`:5901` | [e2e-local.md](./e2e-local.md) |
+| **x11vnc** + Xvfb | VNC Auth (`svnc-demo`) | Raw / Tight(+JPEG) / ZRLE / Hextile / RRE；Cursor + ExtendedDesktopSize | websockify `:6080`→`:5901` | [e2e-local.md](./e2e-local.md) |
 
 TigerVNC 仍为矩阵「必过」目标；本 box 无 root/无 TigerVNC 包时以 x11vnc 对照验收。
 
