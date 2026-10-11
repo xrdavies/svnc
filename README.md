@@ -39,13 +39,15 @@ client.on('frame', ({ damage }) => { /* observe updates */ });
 client.disconnect();
 ```
 
-Transport for classic TCP VNC: use **websockify** (SVNC does not ship a bridge product). See [docs/websockify-decision.md](./docs/websockify-decision.md).
+Transport for classic TCP VNC: use **websockify** (SVNC does not ship a bridge product). See [docs/websockify-decision.md](./docs/websockify-decision.md). For production encryption prefer **WSS reverse proxy / VPN / SSH** rather than RFB-layer VeNCrypt — [docs/peripheral-security.md](./docs/peripheral-security.md).
 
 ## Docs
 
 - [Roadmap](./docs/roadmap.md)
 - [Design proposal](./docs/design-proposal.md)
 - [Compat matrix](./docs/compat-matrix.md)
+- [Peripheral security (WSS / VPN / SSH vs VeNCrypt)](./docs/peripheral-security.md)
+- [Lean RFB gaps](./docs/lean-rfb-gaps.md)
 - [Spike notes](./docs/spike-notes.md)
 - [Clipboard notes](./docs/clipboard.md)
 
