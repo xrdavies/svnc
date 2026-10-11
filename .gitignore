@@ -39,3 +39,6 @@ pnpm-lock.yaml
 # Local VNC / spike scratch
 examples/spike/.local/
 *.pem
+
+# Local e2e runtime (PIDs, logs, VNC pass)
+.local-e2e/

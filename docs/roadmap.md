@@ -1,6 +1,6 @@
 # SVNC 整体路线图
 
-> 状态：规划文档（权威执行顺序）；**Phase 0–4 代码已落地**（直播拓扑验证仍依赖本地 VNC）  
+> 状态：规划文档（权威执行顺序）；**Phase 0–4 代码已落地**；**本地 e2e 拓扑已验证**（见 [e2e-local.md](./e2e-local.md)）  
 > 日期：2026-10-12（Asia/Shanghai）  
 > 依据：[design-proposal.md](./design-proposal.md)、[build-vs-wrap-decision.md](./build-vs-wrap-decision.md)、[websockify-decision.md](./websockify-decision.md)、[novnc-analysis.md](./novnc-analysis.md)
 
@@ -61,7 +61,7 @@ flowchart LR
 
 ## 3. Phase 1 — Wrap Spike（可丢弃）
 
-**状态：实现已合并（2026-10-12）；直播 VNC 验收可选**
+**状态：实现已合并；本地 e2e 已跑通（2026-10-12，x11vnc+websockify）**
 
 **目标：** 用 `@novnc/novnc` 薄适配，在真实拓扑上跑通 **看屏 + screenshot + 桌面坐标 click + typeText**，并 **冻结 Automation TypeScript 接口**（实现可换）。
 

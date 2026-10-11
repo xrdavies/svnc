@@ -55,3 +55,12 @@ TigerVNC (display)  --TCP RFB-->  websockify  --WebSocket-->  SVNC (browser)
 ## 6. 变更规则
 
 新增「必过」行需更新本表并在 PR/提交说明中引用；不得在 Spike 中悄悄扩大为「支持一切 VNC」。
+
+## 7. 本仓库已跑通的本地拓扑
+
+| Server | Auth | Encoding | Bridge | 文档 |
+|--------|------|----------|--------|------|
+| **x11vnc** + Xvfb | VNC Auth (`svnc-demo`) | Raw（客户端优先）；Tight 已实现含 palette | websockify `:6080`→`:5901` | [e2e-local.md](./e2e-local.md) |
+
+TigerVNC 仍为矩阵「必过」目标；本 box 无 root/无 TigerVNC 包时以 x11vnc 对照验收。
+

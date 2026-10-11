@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SVNC Local Demo</title>
+    <style>
+      :root {
+        --bg: #0f1419;
+        --panel: #1a2332;
+        --border: #2d3a4d;
+        --text: #e7ecf3;
+        --muted: #9aa7b8;
+        --accent: #3d8bfd;
+        --ok: #3dd68c;
+        --warn: #f5a524;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.45;
+      }
+      header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--panel);
+      }
+      header h1 { margin: 0; font-size: 1.25rem; }
+      header p { margin: 0.35rem 0 0; color: var(--muted); font-size: 0.9rem; }
+      main {
+        display: grid;
+        grid-template-columns: minmax(280px, 360px) 1fr;
+        gap: 1rem;
+        padding: 1rem;
+        min-height: calc(100vh - 5rem);
+      }
+      @media (max-width: 900px) {
+        main { grid-template-columns: 1fr; }
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.85rem;
+      }
+      .panel h2 {
+        margin: 0 0 0.75rem;
+        font-size: 0.95rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        align-items: center;
+        margin-bottom: 0.55rem;
+      }
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        font-size: 0.75rem;
+        color: var(--muted);
+        flex: 1 1 8rem;
+      }
+      label.inline {
+        flex-direction: row;
+        align-items: center;
+        flex: 0 0 auto;
+      }
+      input, select, button, textarea {
+        font: inherit;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: #0c1118;
+        color: var(--text);
+        padding: 0.4rem 0.55rem;
+      }
+      input[type="number"] { width: 5.5rem; }
+      button {
+        background: #243247;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      button:hover:not(:disabled) { border-color: var(--accent); }
+      button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+      button:disabled { opacity: 0.45; cursor: not-allowed; }
+      #screen {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #000;
+        overflow: auto;
+        min-height: 320px;
+        display: inline-block;
+        max-width: 100%;
+      }
+      #screen canvas { display: block; }
+      #status {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.55rem;
+        border-radius: 6px;
+        background: #0c1118;
+        border: 1px solid var(--border);
+        margin-bottom: 0.75rem;
+      }
+      #status.ok { border-color: var(--ok); color: var(--ok); }
+      #status.err { border-color: #f31260; color: #f31260; }
+      #log {
+        white-space: pre-wrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.75rem;
+        background: #0c1118;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.6rem;
+        height: 220px;
+        overflow: auto;
+      }
+      #preview {
+        max-width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        margin-top: 0.5rem;
+        display: none;
+      }
+      .hint { font-size: 0.75rem; color: var(--muted); margin: 0.25rem 0 0.6rem; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>SVNC Local Demo</h1>
+      <p>
+        Lean RFB client · coordinates = remote desktop pixels · non-viewOnly automation.
+        Default stack: Xvfb + x11vnc + websockify (see <code>docs/e2e-local.md</code>).
+      </p>
+    </header>
+    <main>
+      <aside>
+        <div class="panel">
+          <h2>Connection</h2>
+          <div id="status">disconnected</div>
+          <div class="row">
+            <label>WebSocket URL
+              <input id="url" type="text" value="ws://127.0.0.1:6080/" />
+            </label>
+          </div>
+          <div class="row">
+            <label>VNC password
+              <input id="password" type="password" value="svnc-demo" />
+            </label>
+          </div>
+          <div class="row">
+            <label class="inline"><input id="viewOnly" type="checkbox" /> viewOnly</label>
+            <button id="connect" class="primary">Connect</button>
+            <button id="disconnect" disabled>Disconnect</button>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:1rem">
+          <h2>Automation</h2>
+          <p class="hint">Desktop pixel coordinates (no scaleViewport).</p>
+          <div class="row">
+            <label>x <input id="x" type="number" value="200" /></label>
+            <label>y <input id="y" type="number" value="200" /></label>
+          </div>
+          <div class="row">
+            <button id="move" disabled>MoveTo</button>
+            <button id="click" disabled>Click</button>
+            <button id="dbl" disabled>Dblclick</button>
+            <button id="right" disabled>Right-click</button>
+          </div>
+          <div class="row">
+            <label>toX <input id="toX" type="number" value="400" /></label>
+            <label>toY <input id="toY" type="number" value="350" /></label>
+          </div>
+          <div class="row">
+            <button id="drag" disabled>Drag</button>
+            <button id="scroll" disabled>Scroll↓</button>
+          </div>
+          <div class="row">
+            <label>text
+              <input id="text" type="text" value="Hello SVNC" />
+            </label>
+          </div>
+          <div class="row">
+            <button id="type" disabled>TypeText</button>
+            <button id="keyEnter" disabled>Enter</button>
+            <button id="shot" disabled>Screenshot</button>
+          </div>
+          <img id="preview" alt="last screenshot preview" />
+        </div>
+
+        <div class="panel" style="margin-top:1rem">
+          <h2>Events</h2>
+          <div class="row">
+            <span class="hint">frame / damage counts update while connected.</span>
+          </div>
+          <div class="row">
+            <label>frames <input id="frameCount" type="text" value="0" readonly /></label>
+            <label>damage <input id="damageCount" type="text" value="0" readonly /></label>
+          </div>
+          <button id="clearLog" type="button">Clear log</button>
+          <div id="log" style="margin-top:0.5rem"></div>
+        </div>
+      </aside>
+
+      <section class="panel">
+        <h2>Remote desktop</h2>
+        <div id="screen"></div>
+      </section>
+    </main>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

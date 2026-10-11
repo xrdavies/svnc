@@ -58,3 +58,18 @@ npm run build
 ```
 
 License: **MIT**.
+
+## Local demo / e2e
+
+```bash
+npm install
+npm run build
+npm run e2e:start
+# open http://127.0.0.1:8080/examples/demo/
+# password: svnc-demo
+npm run e2e:verify
+npm run e2e:stop
+```
+
+Details: [docs/e2e-local.md](./docs/e2e-local.md).
+
