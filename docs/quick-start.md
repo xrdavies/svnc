@@ -11,6 +11,8 @@
    - 本身提供 WebSocket 的 VNC 服务。
 3. 自动化输入时会话必须 **`viewOnly: false`**（决策 **D6**）。
 
+> **传输限制：** 浏览器里 **不支持** `vnc://`，也不能直连裸 TCP RFB。连接 URL 必须是 **`ws://` 或 `wss://`**（websockify，或自带 WebSocket 的 VNC）。`vnc://host:5900` 这类链接无法被 SVNC 打开。
+
 SVNC **不**自带生产级 TCP↔WS 桥；见 [websockify-decision.md](./websockify-decision.md)。生产加密放外围（WSS / VPN / SSH），见 [peripheral-security.md](./peripheral-security.md)（**D7**）。
 
 ## 2. 安装

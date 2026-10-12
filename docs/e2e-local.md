@@ -5,6 +5,8 @@
 
 ## Platform support
 
+> **No `vnc://`:** SVNC only connects over **`ws://` / `wss://`**. A bare TCP VNC URL (`vnc://…` or `host:5900`) must go through websockify (or native WS VNC) first.
+
 | Path | Platforms | What it starts |
 |------|-----------|----------------|
 | `npm run e2e:start` | **Linux** (needs `Xvfb`, `x11vnc`, `xsetroot`, `websockify`, `python3`) | Full stack: virtual display + VNC + WS bridge + static HTTP |

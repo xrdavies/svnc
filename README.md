@@ -31,6 +31,8 @@ npm install svnc
 
 Requires a browser (or JSDOM-like) environment with **WebSocket** + **Canvas**, and a VNC path reachable as WebSocket (websockify or native WS VNC).
 
+> **Transport:** SVNC does **not** support `vnc://` (or bare TCP RFB) in the browser. The connect URL must be **`ws://` or `wss://`**. Classic TCP VNC needs [websockify](https://github.com/novnc/websockify) (or a VNC server that speaks WebSocket natively). See [docs/websockify-decision.md](./docs/websockify-decision.md).
+
 ## Quick API sketch
 
 Full reference: [Automation API](./docs/automation-api.md). Step-by-step: [Quick start](./docs/quick-start.md).
@@ -51,7 +53,7 @@ client.on('frame', ({ damage }) => { /* observe updates */ });
 client.disconnect();
 ```
 
-Transport for classic TCP VNC: use **websockify** (SVNC does not ship a bridge product). See [docs/websockify-decision.md](./docs/websockify-decision.md).
+SVNC does not ship a bridge product; use upstream **websockify** (or native WS VNC) for TCP targets.
 
 Production encryption: prefer **WSS reverse proxy / VPN / SSH** — not RFB VeNCrypt (**D7**). See [docs/peripheral-security.md](./docs/peripheral-security.md) and [docs/security.md](./docs/security.md).
 
