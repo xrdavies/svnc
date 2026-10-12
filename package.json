@@ -45,6 +45,8 @@
     "e2e:stop": "./scripts/local-e2e/stop.sh",
     "e2e:status": "./scripts/local-e2e/status.sh",
     "e2e:verify": "node scripts/local-e2e/verify-protocol.mjs && node scripts/local-e2e/verify-browser.mjs",
+    "demo:serve": "./scripts/local-e2e/serve-demo.sh",
+    "e2e:demo": "./scripts/local-e2e/serve-demo.sh",
     "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "devDependencies": {

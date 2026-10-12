@@ -11,7 +11,7 @@
 |------|------|
 | [快速开始](./quick-start.md) | 安装、本地拓扑、最小连接与截图/点击 |
 | [README](../README.md) | 产品目标、状态总览、示例入口 |
-| [本地 e2e](./e2e-local.md) | Xvfb + x11vnc + websockify + Demo 端口与验收 |
+| [本地 e2e](./e2e-local.md) | Linux 全栈；macOS 用 `demo:serve` + 远程/Docker WS |
 | [兼容矩阵](./compat-matrix.md) | Server / Auth / Encoding 必过拓扑 |
 
 ## API 与嵌入

@@ -28,16 +28,16 @@ npm install
 npm run build
 ```
 
-## 3. 最快：用仓库自带本地 e2e
+## 3. 最快：本地 Demo
 
-在已克隆的仓库根目录：
+### Linux：一键完整拓扑
+
+`npm run e2e:start` 需要 **Xvfb / x11vnc / websockify**（脚本面向 Linux）。在已克隆的仓库根目录：
 
 ```bash
 npm run build
 npm run e2e:start
 ```
-
-然后浏览器打开：
 
 | 页面 | URL |
 |------|-----|
@@ -47,6 +47,17 @@ npm run e2e:start
 默认 WebSocket：`ws://127.0.0.1:6080/` · 密码：`svnc-demo`。
 
 停止：`npm run e2e:stop`。协议与浏览器自动化验收：`npm run e2e:verify`。细节见 [e2e-local.md](./e2e-local.md)。
+
+### macOS / Windows：只起静态页 + 自备 VNC WebSocket
+
+若出现 `x11vnc: command not found`，不要强行装 Linux 栈；改用：
+
+```bash
+npm run build
+npm run demo:serve    # 别名：npm run e2e:demo
+```
+
+打开 http://127.0.0.1:8080/examples/demo/，在表单里填写你的 **WebSocket URL**（例如本机 `ws://127.0.0.1:6080/`、Docker 映射端口，或远程 `wss://…`）和密码。Homebrew / Docker / 远程方案见 [e2e-local.md](./e2e-local.md)。
 
 ## 4. 最小网页接入
 

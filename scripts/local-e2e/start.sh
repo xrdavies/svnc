@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Start local SVNC e2e topology: Xvfb + x11vnc + websockify + static HTTP.
+# Linux-oriented. On macOS/Windows, see docs/e2e-local.md or use: npm run demo:serve
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -14,6 +15,25 @@ HTTP_PORT="${SVNC_HTTP_PORT:-8080}"
 GEOMETRY="${SVNC_GEOMETRY:-1280x720x24}"
 PASSFILE="${RUNTIME}/vnc.pass"
 PASSWORD="${SVNC_VNC_PASSWORD:-svnc-demo}"
+
+need_cmds=(Xvfb x11vnc xsetroot websockify python3)
+missing=()
+for c in "${need_cmds[@]}"; do
+  if ! command -v "${c}" >/dev/null 2>&1; then
+    missing+=("${c}")
+  fi
+done
+if ((${#missing[@]} > 0)); then
+  echo "error: npm run e2e:start requires Linux packages that are not on PATH:" >&2
+  echo "  missing: ${missing[*]}" >&2
+  echo "" >&2
+  echo "This script is Linux-oriented (Xvfb + x11vnc + websockify)." >&2
+  echo "On macOS / Windows:" >&2
+  echo "  1) npm run build && npm run demo:serve" >&2
+  echo "     then point the Demo WebSocket URL at a remote or Docker VNC bridge; or" >&2
+  echo "  2) follow Homebrew / Docker options in docs/e2e-local.md" >&2
+  exit 1
+fi
 
 if [[ ! -f "${PASSFILE}" ]]; then
   x11vnc -storepasswd "${PASSWORD}" "${PASSFILE}"

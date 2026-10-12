@@ -74,7 +74,7 @@ Index: **[docs/README.md](./docs/README.md)**
 | [Quick start](./docs/quick-start.md) | Users — install, local e2e, minimal connect |
 | [Automation API](./docs/automation-api.md) | Users / Agents — `SVNCClient`, events, errors |
 | [Architecture](./docs/architecture.md) | Devs — module map ↔ `src/` |
-| [Local e2e](./docs/e2e-local.md) | Devs — Xvfb + x11vnc + websockify |
+| [Local e2e](./docs/e2e-local.md) | Devs — Linux full stack; macOS `demo:serve` |
 | [Compat matrix](./docs/compat-matrix.md) | Devs — Server / Auth / Encoding |
 | [Roadmap](./docs/roadmap.md) | Planning — Phases + decisions D1–D7 |
 | [Design proposal](./docs/design-proposal.md) | Planning — vision / early draft |
@@ -97,14 +97,25 @@ npm run build
 
 ### Local demo / e2e
 
+**Linux** (Xvfb + x11vnc + websockify):
+
 ```bash
 npm run build
 npm run e2e:start
 # lite:  http://127.0.0.1:8080/examples/lite/
 # demo:  http://127.0.0.1:8080/examples/demo/
-# password: svnc-demo
+# password: svnc-demo · WS: ws://127.0.0.1:6080/
 npm run e2e:verify
 npm run e2e:stop
+```
+
+**macOS / Windows** (static Demo only; bring your own VNC WebSocket):
+
+```bash
+npm run build
+npm run demo:serve   # alias: npm run e2e:demo
+# open http://127.0.0.1:8080/examples/demo/
+# set WebSocket URL to ws://… or wss://… (Docker / remote / local websockify)
 ```
 
 Details: [docs/e2e-local.md](./docs/e2e-local.md).
