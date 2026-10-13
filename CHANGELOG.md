@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] — 2026-10-12
 
-First public release of **svnc** (Simple VNC): lean browser RFB client with Agent-friendly Automation APIs.
+First public release of **@xrdavies/svnc** (Simple VNC): lean browser RFB client with Agent-friendly Automation APIs.
+
+> npm package name is scoped (`@xrdavies/svnc`) because unscoped `svnc` was rejected by the registry for similarity to existing packages.
 
 ### Added
 

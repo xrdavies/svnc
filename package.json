@@ -1,5 +1,5 @@
 {
-  "name": "svnc",
+  "name": "@xrdavies/svnc",
   "version": "0.1.0",
   "description": "Simple VNC \u2014 browser VNC client with Agent-friendly screenshot and input APIs",
   "type": "module",

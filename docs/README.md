@@ -1,6 +1,6 @@
 # SVNC 文档索引
 
-> 仓库：[xrdavies/svnc](https://github.com/xrdavies/svnc) · 包：`svnc@0.1.0` · 许可证：MIT  
+> 仓库：[xrdavies/svnc](https://github.com/xrdavies/svnc) · 包：`@xrdavies/svnc@0.1.0` · 许可证：MIT  
 > 日期：2026-10-12（Asia/Shanghai）
 
 按读者分组。实现以 [`src/`](../src/) 与导出面 [`src/index.ts`](../src/index.ts) 为准；本文不另发明 API。

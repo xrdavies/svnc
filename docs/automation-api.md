@@ -18,14 +18,14 @@ import {
   eventToDesktopPoint,
   toKeysym,
   textToKeysyms,
-} from 'svnc';
+} from '@xrdavies/svnc';
 import type {
   AutomationSurface,
   ConnectOptions,
   FrameSnapshot,
   RecognitionProvider,
   UITarget,
-} from 'svnc';
+} from '@xrdavies/svnc';
 ```
 
 ### `SVNCClient.connect`

@@ -18,7 +18,7 @@ SVNC **不**自带生产级 TCP↔WS 桥；见 [websockify-decision.md](./websoc
 ## 2. 安装
 
 ```bash
-npm install svnc
+npm install @xrdavies/svnc
 ```
 
 从本仓库开发：
@@ -66,7 +66,7 @@ npm run demo:serve    # 别名：npm run e2e:demo
 在页面里提供一个挂载点（例如 `<div id="screen"></div>`），连接后 canvas 会画到该元素内（或由会话自建 canvas）：
 
 ```ts
-import { SVNCClient } from 'svnc';
+import { SVNCClient } from '@xrdavies/svnc';
 
 const mount = document.getElementById('screen');
 

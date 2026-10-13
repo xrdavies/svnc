@@ -4,7 +4,7 @@
 
 Inspired by [noVNC](https://github.com/novnc/noVNC), with a lean self-built RFB path and a frozen Automation contract so programs (not only humans) can operate a remote desktop.
 
-**npm:** `svnc@0.1.0` · **License:** MIT
+**npm:** `@xrdavies/svnc@0.1.0` · **License:** MIT
 
 ## Product goals
 
@@ -16,7 +16,7 @@ Inspired by [noVNC](https://github.com/novnc/noVNC), with a lean self-built RFB 
 
 | Phase | Status |
 |-------|--------|
-| P0 decisions (MIT, `svnc`, Raw→Tight, screenshot-first, non-viewOnly, **D7 peripheral TLS**) | Done |
+| P0 decisions (MIT, `@xrdavies/svnc`, Raw→Tight, screenshot-first, non-viewOnly, **D7 peripheral TLS**) | Done |
 | P1 Wrap Spike (frozen Automation types; Wrap retired) | Done |
 | P2 Lean RFB (WS, none/VNCAuth, encodings, Canvas) | Done |
 | P3 frame/damage, drag/scroll/dblclick, inputMode, errors, clipboard docs | Done |
@@ -26,7 +26,7 @@ Inspired by [noVNC](https://github.com/novnc/noVNC), with a lean self-built RFB 
 ## Install
 
 ```bash
-npm install svnc
+npm install @xrdavies/svnc
 ```
 
 Requires a browser (or JSDOM-like) environment with **WebSocket** + **Canvas**, and a VNC path reachable as WebSocket (websockify or native WS VNC).
@@ -38,7 +38,7 @@ Requires a browser (or JSDOM-like) environment with **WebSocket** + **Canvas**, 
 Full reference: [Automation API](./docs/automation-api.md). Step-by-step: [Quick start](./docs/quick-start.md).
 
 ```ts
-import { SVNCClient } from 'svnc';
+import { SVNCClient } from '@xrdavies/svnc';
 
 const client = await SVNCClient.connect(document.getElementById('screen'), {
   url: 'ws://127.0.0.1:6080/',

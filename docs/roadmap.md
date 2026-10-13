@@ -55,7 +55,7 @@ flowchart LR
 | 0.2 Server × Auth × Encoding | [compat-matrix.md](./compat-matrix.md)：TigerVNC + none/VNC Auth + **Raw**，下一步 **Tight** | ✅ |
 | 0.3 Recognition 首期范围 | **不做内置识别**；仅 **截图 API** 交给外部 AI Agent（D3） | ✅ |
 | 0.4 仓库骨架 | 单包 `src/` + `examples/` + `.gitignore` + `package.json`（D5） | ✅ |
-| 0.5 npm 名 | **`svnc`**（查询时未被占用）（D4） | ✅ |
+| 0.5 npm 名 | **`@xrdavies/svnc`**（裸名 `svnc` 因 npm 相似度拦截；scoped 首发）（D4） | ✅ |
 | 0.6 自动化会话 | 非 **viewOnly**（D6） | ✅ |
 
 **Exit：** 已满足——矩阵有必过拓扑；许可证已定；可开始 Phase 1 编码。
@@ -244,7 +244,7 @@ Automation types（Phase 1 冻结） ──► Phase 2/3/4 实现不得无故改
 | D1 | 自研代码许可证 | **MIT**（`LICENSE` + `package.json`） | ✅ 已关闭 |
 | D2 | Raw 之后 Encoding 第二优先 | **Tight**（ZRLE 不进首期第二优先） | ✅ 已关闭 |
 | D3 | 首期 Recognition | **不做内置识别**；仅提供 **截图 API**，由外部 AI Agent 分析决策 | ✅ 已关闭 |
-| D4 | npm 包名 | **`svnc`**（查询时未被占用） | ✅ 已关闭 |
+| D4 | npm 包名 | **`@xrdavies/svnc`**（裸名 `svnc` 被 npm E403 相似度拦截，改 scoped 公开包） | ✅ 已关闭 |
 | D5 | 仓库布局 | **单包 `src/`**（必要时再拆） | ✅ 已关闭 |
 | D6 | 自动化测试会话 | **非 viewOnly**（`click` / `typeText` 必可注入） | ✅ 已关闭 |
 | D7 | 传输加密 vs RFB 内 TLS/VeNCrypt/RA2 | **外围优先**（WSS 反代 / VPN / SSH / 原生 WSS）；SVNC 只做 **None + VNC Auth**；**不在 RFB 客户端实现 VeNCrypt / RA2 / RFB-TLS**，除非 [compat-matrix](./compat-matrix.md) 新增不可替代的强制拓扑 | ✅ 已关闭 |
