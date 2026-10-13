@@ -38,6 +38,7 @@ TigerVNC (display)  --TCP RFB-->  websockify  --WebSocket-->  SVNC (browser)
 |----------|------|------|
 | None (1) | ✅ | 本地 Demo / CI |
 | VNC Authentication (2) | ✅ | 密码路径必过 |
+| Apple Remote Desktop (30) | ✅ | macOS Screen Sharing：用户名 + 密码，进入该用户会话（VNC Auth 只会看到登录窗口） |
 | VeNCrypt / RA2 / RFB-TLS | ❌ | **D7**：不进客户端默认路径；传输加密用外围 WSS/VPN/SSH，见 [peripheral-security.md](./peripheral-security.md) |
 
 **传输加密（与 RFB security type 正交）：** 生产建议浏览器侧 `wss://`（反代终止 TLS）或 VPN/SSH；SVNC 只消费标准 WebSocket URL，不在库内实现 VeNCrypt。

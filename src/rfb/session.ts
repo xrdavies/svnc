@@ -1,5 +1,5 @@
 /**
- * Lean RFB session: handshake (None + VNC Auth), encodings (Raw/CopyRect/RRE/Hextile/ZRLE/Tight+JPEG),
+ * Lean RFB session: handshake (None, VNC Auth, Apple Remote Desktop), encodings (Raw/CopyRect/RRE/Hextile/ZRLE/Tight+JPEG),
  * soft cursor, ExtendedDesktopSize, input, framebuffer.
  */
 
@@ -25,6 +25,7 @@ import { EventBus } from '../utils/events.js';
 import { attachHumanInput } from '../input/human-input.js';
 import { textToKeysyms, toKeysym } from '../utils/keysym.js';
 import { Encoding, PointerButtonMask, RFB_VERSION, SecurityType, ClientMessage, ServerMessage } from './constants.js';
+import { ardResponse } from './ard.js';
 import { vncEncryptChallenge } from './d3des.js';
 import { decodeCursorPseudo } from './encodings/cursor.js';
 import { parseExtendedDesktopSize } from './encodings/extended-desktop-size.js';
@@ -166,9 +167,12 @@ export class RfbSession implements AutomationSurface {
     }
     const types = await this.transport.read(typeCount);
     const wantPassword = Boolean(this.opts.credentials?.password);
+    const wantUser = wantPassword && Boolean(this.opts.credentials?.username);
     let chosen: number = SecurityType.None;
     const has = (t: number) => types.includes(t);
-    if (wantPassword && has(SecurityType.VncAuth)) chosen = SecurityType.VncAuth;
+    // A macOS user sign-in lands in that user's session; VNC Auth gets the login window.
+    if (wantUser && has(SecurityType.AppleRemoteDesktop)) chosen = SecurityType.AppleRemoteDesktop;
+    else if (wantPassword && has(SecurityType.VncAuth)) chosen = SecurityType.VncAuth;
     else if (has(SecurityType.None) && !wantPassword) chosen = SecurityType.None;
     else if (has(SecurityType.VncAuth)) chosen = SecurityType.VncAuth;
     else if (has(SecurityType.None)) chosen = SecurityType.None;
@@ -182,6 +186,19 @@ export class RfbSession implements AutomationSurface {
       const password = this.opts.credentials?.password ?? '';
       const response = vncEncryptChallenge(password, challenge);
       this.transport.send(response);
+    } else if (chosen === SecurityType.AppleRemoteDesktop) {
+      const head = await this.transport.read(4);
+      const generator = readU16(head, 0);
+      const keyLength = readU16(head, 2);
+      const prime = await this.transport.read(keyLength);
+      const serverKey = await this.transport.read(keyLength);
+      const { credentials, publicKey } = await ardResponse(
+        { generator, prime, serverKey },
+        this.opts.credentials?.username ?? '',
+        this.opts.credentials?.password ?? '',
+      );
+      this.transport.send(credentials);
+      this.transport.send(publicKey);
     }
 
     const result = readU32(await this.transport.read(4), 0);

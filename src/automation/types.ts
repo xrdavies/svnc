@@ -45,6 +45,7 @@ export type WaitOptions = {
 export type ConnectOptions = {
   /** WebSocket URL that carries RFB bytes (e.g. ws://host:6080/ or native WS VNC). */
   url: string;
+  /** `username` + `password` select Apple Remote Desktop (type 30) when offered; `password` alone selects VNC Auth. */
   credentials?: {
     username?: string;
     password?: string;

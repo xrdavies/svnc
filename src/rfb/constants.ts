@@ -6,6 +6,8 @@ export const SecurityType = {
   Invalid: 0,
   None: 1,
   VncAuth: 2,
+  /** Apple Remote Desktop (macOS user name + password). */
+  AppleRemoteDesktop: 30,
 } as const;
 
 export const ClientMessage = {

@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-10-13
+
+### Added
+
+- **Apple Remote Desktop authentication** (RFB security type 30) for macOS Screen Sharing. When `credentials` has both `username` and `password` and the server offers type 30, SVNC signs in as that macOS user and lands in the user's session instead of the login window. Diffie-Hellman via `BigInt`, MD5 and AES-128-ECB (from WebCrypto AES-CBC) in `src/rfb/ard.ts`. Needs WebCrypto (secure context: `https`/`wss`, `localhost`, or Tauri/Electron).
+
 ## [0.1.0] — 2026-10-12
 
 First public release of **@xrdavies/svnc** (Simple VNC): lean browser RFB client with Agent-friendly Automation APIs.

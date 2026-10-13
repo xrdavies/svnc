@@ -42,7 +42,7 @@ import { SVNCClient } from '@xrdavies/svnc';
 
 const client = await SVNCClient.connect(document.getElementById('screen'), {
   url: 'ws://127.0.0.1:6080/',
-  credentials: { password: 'secret' }, // optional VNC Auth
+  credentials: { password: 'secret' }, // optional VNC Auth; add `username` for macOS Screen Sharing (ARD, type 30)
   viewOnly: false, // required for click/typeText (D6)
 });
 

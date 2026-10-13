@@ -43,6 +43,7 @@
 | [`src/rfb/transport.ts`](../src/rfb/transport.ts) | WebSocket 字节读写缓冲 |
 | [`src/rfb/constants.ts`](../src/rfb/constants.ts) | 协议常量 |
 | [`src/rfb/d3des.ts`](../src/rfb/d3des.ts) | VNC Auth 挑战加密 |
+| [`src/rfb/ard.ts`](../src/rfb/ard.ts) | Apple Remote Desktop（type 30）：DH + MD5 + AES-128-ECB |
 | [`src/rfb/pixel-format.ts`](../src/rfb/pixel-format.ts) | 像素格式协商 |
 | [`src/rfb/inflate.ts`](../src/rfb/inflate.ts) | zlib 辅助（Tight / ZRLE） |
 | [`src/rfb/encodings/`](../src/rfb/encodings/) | Raw 像素路径、Tight / JPEG、ZRLE、Hextile、RRE、Cursor、ExtendedDesktopSize 等 |

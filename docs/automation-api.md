@@ -42,7 +42,7 @@ static connect(target: HTMLElement | null, options: ConnectOptions): Promise<SVN
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `url` | `string` | 承载 RFB 字节的 WebSocket URL（如 `ws://host:6080/`） |
-| `credentials` | `{ username?, password? }` | 可选；有 `password` 时优先协商 VNC Auth |
+| `credentials` | `{ username?, password? }` | 可选；同时有 `username` 与 `password` 且服务端提供时优先 Apple Remote Desktop（type 30，macOS 用户登录）；仅 `password` 时协商 VNC Auth |
 | `shared` | `boolean` | RFB shared-flag，默认 `true` |
 | `viewOnly` | `boolean` | `true` 时输入类 API 抛 `VIEW_ONLY`；自动化须 `false`（D6） |
 | `preferredEncodings` | `Array<'raw' \| 'tight' \| 'zrle' \| 'hextile' \| 'rre' \| 'copyrect'>` | 向服务端声明偏好；实际以协商为准 |
