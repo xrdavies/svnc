@@ -47,7 +47,8 @@
     "e2e:verify": "node scripts/local-e2e/verify-protocol.mjs && node scripts/local-e2e/verify-browser.mjs",
     "demo:serve": "./scripts/local-e2e/serve-demo.sh",
     "e2e:demo": "./scripts/local-e2e/serve-demo.sh",
-    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+    "prepublishOnly": "npm run typecheck && npm test && npm run build",
+    "release": "npm run prepublishOnly && npm pack && npm login && npm publish --access public --registry=https://registry.npmjs.org"
   },
   "devDependencies": {
     "@types/jpeg-js": "^0.3.7",
